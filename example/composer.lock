@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "..",
-                "reference": "1c84c10f76d6f15b9851becd470827d5cf83fc47"
+                "reference": "09a99391af69a5b29cf3fb0b9bc8eac808598a89"
             },
             "require": {
                 "ircmaxell/ffime": "dev-master",
@@ -21,11 +21,11 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Extism\\": "php/src/"
+                    "Extism\\": "src/"
                 },
                 "files": [
-                    "php/src/Context.php",
-                    "php/src/Plugin.php"
+                    "src/Context.php",
+                    "src/Plugin.php"
                 ]
             },
             "autoload-dev": {
