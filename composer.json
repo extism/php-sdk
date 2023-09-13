@@ -30,11 +30,11 @@
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
-      "Extism\\": "php/src/"
+      "Extism\\": "src/"
     },
     "files": [
-      "php/src/Context.php",
-      "php/src/Plugin.php"
+      "src/Context.php",
+      "src/Plugin.php"
     ]
   },
   "autoload-dev": {
