@@ -48,6 +48,6 @@ jobs:
           fail-fast: true
       - name: Test PHP SDK
         run: |
-          cd php/example
+          cd example
           composer install
           php index.php
