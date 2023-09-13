@@ -1,0 +1,53 @@
+name: PHP CI
+  
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  prepare:
+    name: Install Extism Runtime
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/libextism
+  php:
+    name: PHP Test
+    runs-on: ${{ matrix.os }}
+    needs: prepare
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        rust:
+          - stable
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Download libextism.so
+        uses: actions/download-artifact@v2
+        with:
+          name: libextism-so-artifact
+      - name: Download libextism.h
+        uses: actions/download-artifact@v2
+        with:
+          name: libextism-h-artifact
+      - name: Move the files because download can't sudo
+        run: |
+          ls -lah ./
+          sudo mv libextism.so /usr/local/lib/
+          sudo mv extism.h /usr/local/include/
+      - name: Setup PHP env
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          extensions: ffi
+          tools: composer
+        env:
+          fail-fast: true
+      - name: Test PHP SDK
+        run: |
+          cd php/example
+          composer install
+          php index.php
