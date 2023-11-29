@@ -31,4 +31,5 @@ jobs:
         run: |
           cd example
           composer install
+          composer require --dev phpunit/phpunit ^9
           ./vendor/bin/phpunit tests
