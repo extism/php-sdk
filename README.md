@@ -41,8 +41,6 @@ First you should add a using statement for Extism:
 ```php
 use Extism\Plugin;
 use Extism\Manifest;
-use Extism\ByteArrayWasmSource;
-use Extism\PathWasmSource;
 use Extism\UrlWasmSource;
 ```
 
