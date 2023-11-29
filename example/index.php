@@ -1,10 +1,18 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . "/../src/Plugin.php";
 
-$wasm = file_get_contents("../wasm/count-vowels.wasm");
-$plugin = new \Extism\Plugin($wasm);
+\Extism\Plugin::setLogFile("log.txt", "trace");
 
-$output = $plugin->call("count_vowels", "this is an example");
-$json = json_decode(pack('C*', ...$output));
-echo "Vowels counted = " . $json->{'count'} . PHP_EOL;
+$wasm = file_get_contents("../wasm/count_vowels.wasm");
+$plugin = \Extism\Plugin::fromBytes($wasm);
+
+if ($plugin->functionExists("count_vowels")) {
+    echo "count_vowels exists!" . PHP_EOL;
+} else {
+    echo "count_vowels doesn't exist!" . PHP_EOL;
+}
+
+$result = $plugin->call("count_vowels", "");
+echo $result . PHP_EOL;
+echo "DONE!";

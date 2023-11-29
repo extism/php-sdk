@@ -22,8 +22,7 @@
     }
   ],
   "require": {
-    "php": "^7.4 || ^8",
-    "ircmaxell/ffime": "dev-master"
+    "php": "^7.4 || ^8"
   },
   "suggest": {},
   "minimum-stability": "dev",
