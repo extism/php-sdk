@@ -31,4 +31,4 @@ jobs:
         run: |
           cd example
           composer install
-          php index.php
+          ./vendor/bin/phpunit tests
