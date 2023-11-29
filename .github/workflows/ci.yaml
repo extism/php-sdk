@@ -30,7 +30,7 @@ jobs:
       - name: Setup Composer
         run: |
           composer install
-          composer require --dev phpunit/phpunit ^9
+          composer require --dev phpunit/phpunit ^10
       - name: Test PHP SDK
         run: |
           ./vendor/bin/phpunit ./tests
