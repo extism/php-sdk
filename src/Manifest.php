@@ -11,7 +11,7 @@ class Manifest
      /**
      * Create a manifest from one or more Wasm sources.
      *
-     * @param WasmSource[] $wasm
+     * @param WasmSource[] $wasm Array of `WasmSource`s.
      */
     public function __construct(...$wasm)
     {
@@ -23,9 +23,9 @@ class Manifest
     }
 
     /**
-     * List of Wasm sources. See PathWasmSource and ByteArrayWasmSource.
+     * List of Wasm sources. See `UrlWasmSource`, `PathWasmSource` and `ByteArrayWasmSource`.
      *
-     * @var array
+     * @var WasmSource[]
      */
     public $wasm = [];
 
@@ -38,25 +38,25 @@ class Manifest
     public $memory;
 
     /**
-     * List of host names the plugins can access.
+     * List of host names the plugins can access. Examples: `*.example.com`, `www.something.com`, `www.*.com`
      *
-     * @var array
+     * @var array|null
      */
-    public $allowed_hosts = [];
+    public $allowed_hosts;
 
     /**
-     * List of directories that can be accessed by the plugins.
+     * Map of directories that can be accessed by the plugins. Examples: `src=dest`, `\var\apps\123=\home`
      *
-     * @var array
+     * @var \object|null
      */
-    public $allowed_paths = [];
+    public $allowed_paths;
 
     /**
-     * Configurations available to the plugins.
+     * Configurations available to the plugins. Examples: `key=value`, `secret=1234`
      *
-     * @var array
+     * @var \object|null
      */
-    public $config = [];
+    public $config;
 
     /**
      * Plugin call timeout in milliseconds.
@@ -160,14 +160,14 @@ class UrlWasmSource extends WasmSource
     public $url;
 
     /**
-     * HTTP headers.
+     * HTTP headers. Examples: `header1=value`, `Authorization=Basic 123`
      *
-     * @var array
+     * @var object|null
      */
-    public $headers = [];
+    public $headers;
 
     /**
-     * HTTP Method.
+     * HTTP Method. Examples: `GET`, `POST`, `DELETE`. See `HttpMethod` for a list of options.
      *
      * @var string|null
      */
@@ -210,7 +210,7 @@ class ByteArrayWasmSource extends WasmSource
     }
 
     /**
-     * The byte array representing the Wasm code.
+     * The byte array representing the Wasm code encoded in Base64.
      *
      * @var string
      */
