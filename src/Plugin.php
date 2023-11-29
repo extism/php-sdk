@@ -12,7 +12,7 @@ class Plugin
 
     public static function fromBytes(string $bytes, bool $with_wasi = false): self
     {
-        $byteSource = new ByteArrayWasmSource(base64_encode($bytes));
+        $byteSource = new ByteArrayWasmSource($bytes);
         $manifest = new Manifest($byteSource);
 
         return new self($manifest, $with_wasi);
@@ -66,8 +66,7 @@ class Plugin
             $msg = "code = " . $rc;
             $err = $this->lib->extism_error($this->handle);
             if ($err) {
-                $msg = $msg . ", error = " . \FFI::string($err);
-                \FFI::free($err);
+                $msg = $msg . ", error = " . $err;
             }
             throw new \Exception("Extism: call to '" . $name . "' failed with " . $msg);
         }

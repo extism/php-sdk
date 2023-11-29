@@ -11,7 +11,7 @@ class Manifest
      /**
      * Create a manifest from one or more Wasm sources.
      *
-     * @param array $wasm
+     * @param WasmSource[] $wasm
      */
     public function __construct(...$wasm)
     {
@@ -115,6 +115,11 @@ class PathWasmSource extends WasmSource
     public function __construct($path, $name = null, $hash = null)
     {
         $this->path = realpath($path);
+
+        if (!$this->path) {
+            throw new \Exception("Path not found: '" . $path . "'");
+        }
+
         $this->name = $name ?? pathinfo($path, PATHINFO_FILENAME);
         $this->hash = $hash;
     }
@@ -144,6 +149,7 @@ class UrlWasmSource extends WasmSource
         $this->url = $url;
         $this->name = $name;
         $this->hash = $hash;
+        $this->headers = new \stdClass();
     }
 
     /**
@@ -196,9 +202,9 @@ class ByteArrayWasmSource extends WasmSource
      * @param string|null $name
      * @param string|null $hash
      */
-    public function __construct($data, $name = null, $hash = null)
+    public function __construct(string $data, $name = null, $hash = null)
     {
-        $this->data = $data;
+        $this->data = base64_encode($data);
         $this->name = $name;
         $this->hash = $hash;
     }

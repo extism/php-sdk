@@ -23,7 +23,7 @@
                     "Extism\\": "src/"
                 },
                 "files": [
-                    "src/Context.php",
+                    "src/Manifest.php",
                     "src/Plugin.php"
                 ]
             },
