@@ -45,18 +45,6 @@ final class ManifestTest extends TestCase
         $this->assertEquals(3, $actual->count);
     }
 
-    function loadPlugin(string $name, ?callable $config = null)
-    {
-        $path = __DIR__ . '/../wasm/' . $name;
-        $manifest = new Manifest(new PathWasmSource($path, 'main'));
-
-        if ($config !== null) {
-            $config($manifest);
-        }
-
-        return new Plugin($manifest, true);
-    }
-
     public function testCanSetConfig(): void
     {
         $plugin = self::loadPlugin("config.wasm", function ($manifest) {
@@ -95,6 +83,18 @@ final class ManifestTest extends TestCase
         });
 
         $plugin->call("run_test", "");
+    }
+
+    public static function loadPlugin(string $name, ?callable $config = null)
+    {
+        $path = __DIR__ . '/../wasm/' . $name;
+        $manifest = new Manifest(new PathWasmSource($path, 'main'));
+    
+        if ($config !== null) {
+            $config($manifest);
+        }
+    
+        return new Plugin($manifest, true);
     }
 }
 
