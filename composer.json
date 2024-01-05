@@ -7,7 +7,9 @@
     "WebAssembly",
     "plugin-system",
     "runtime",
-    "plug-in"
+    "plug-in",
+    "wasm",
+    "framework"
   ],
   "authors": [
     {
@@ -17,8 +19,8 @@
     },
     {
       "name": "Dylibso, Inc.",
-      "email": "oss@dylib.so",
-      "homepage": "https://dylib.so"
+      "email": "oss@dylibso.com",
+      "homepage": "https://dylibso.com"
     }
   ],
   "require": {
