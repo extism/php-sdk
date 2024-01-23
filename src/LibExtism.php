@@ -25,7 +25,7 @@ class LibExtism
         foreach ($directories as $directory) {
             $fullPath = $directory . DIRECTORY_SEPARATOR . $name;
 
-            if (file_exists($fullPath)) {
+            if (file_exists($fullPath)) {               
                 return FFI::cdef(
                     file_get_contents(__DIR__ . "/extism.h"),
                     $fullPath
@@ -119,7 +119,7 @@ class LibExtism
             return null;
         }
 
-        $str = FFI::new($type . "[" . \strlen($string) . "]", true);
+        $str = $this->extism->new($type . "[" . \strlen($string) . "]", true);
         FFI::memcpy($str, $string, \strlen($string));
         return $str;
     }
