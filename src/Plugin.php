@@ -49,7 +49,7 @@ class Plugin
             return;
         }
 
-        $errPtr = \FFI::new(\FFI::type("char*"));
+        $errPtr = $lib->ffi->new($lib->ffi->type("char*"));
         $handle = $this->lib->extism_plugin_new($data, strlen($data), [], 0, $with_wasi, \FFI::addr($errPtr));
 
         if (\FFI::isNull($errPtr) == false) {

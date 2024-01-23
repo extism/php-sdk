@@ -2,18 +2,18 @@
 
 class LibExtism
 {
-    private FFI $extism;
+    public FFI $ffi;
 
     public function __construct() {
         $name = LibExtism::soname();
-        $this->extism = self::findSo($name);
+        $this->ffi = LibExtism::findSo($name);
     }
 
     function findSo(string $name): FFI {
         $platform = php_uname("s");
 
         $directories = [];
-        if (self::startsWith($platform, "windows")) {
+        if (LibExtism::startsWith($platform, "windows")) {
             $path = getenv('PATH');
             $directories = explode(PATH_SEPARATOR, $path);
 
@@ -56,53 +56,53 @@ class LibExtism
     {
         $ptr = $this->owned("uint8_t", $wasm);
         $wasi = $with_wasi ? 1 : 0;
-        $pluginPtr = $this->extism->extism_plugin_new($ptr, $wasm_size, null, $n_functions, $wasi, $errmsg);
+        $pluginPtr = $this->ffi->extism_plugin_new($ptr, $wasm_size, null, $n_functions, $wasi, $errmsg);
 
-        return $this->extism->cast("ExtismPlugin*", $pluginPtr);
+        return $this->ffi->cast("ExtismPlugin*", $pluginPtr);
     }
 
     function extism_plugin_new_error_free(FFI\CData $ptr): void {
-        $this->extism->extism_plugin_new_error_free($ptr);
+        $this->ffi->extism_plugin_new_error_free($ptr);
     }
 
     function extism_plugin_function_exists(FFI\CData $plugin, string $func_name): bool
     {
-        return $this->extism->extism_plugin_function_exists($plugin, $func_name);
+        return $this->ffi->extism_plugin_function_exists($plugin, $func_name);
     }
 
     function extism_version(): string
     {
-        return $this->extism->extism_version();
+        return $this->ffi->extism_version();
     }
 
     function extism_plugin_call(FFI\CData $plugin, string $func_name, string $data, int $data_len): int
     {
         $dataPtr = $this->owned("uint8_t", $data);
-        return $this->extism->extism_plugin_call($plugin, $func_name, $dataPtr, $data_len);
+        return $this->ffi->extism_plugin_call($plugin, $func_name, $dataPtr, $data_len);
     }
 
     function extism_error(FFI\CData $plugin): ?string
     {
-        return $this->extism->extism_error($plugin);
+        return $this->ffi->extism_error($plugin);
     }
 
     function extism_plugin_error(FFI\CData $plugin): ?string
     {
-        return $this->extism->extism_plugin_error($plugin);
+        return $this->ffi->extism_plugin_error($plugin);
     }
 
     function extism_plugin_output_data(FFI\CData $plugin): string
     {
-        $length = $this->extism->extism_plugin_output_length($plugin);
+        $length = $this->ffi->extism_plugin_output_length($plugin);
 
-        $ptr = $this->extism->extism_plugin_output_data($plugin);
+        $ptr = $this->ffi->extism_plugin_output_data($plugin);
 
         return FFI::string($ptr, $length);
     }
 
     function extism_plugin_free(FFI\CData $plugin): void
     {
-        $this->extism->extism_plugin_free($plugin);
+        $this->ffi->extism_plugin_free($plugin);
     }
 
     function extism_log_file(string $filename, string $log_level): void
@@ -110,7 +110,7 @@ class LibExtism
         $filenamePtr = $this->ownedZero($filename);
         $log_levelPtr = $this->ownedZero($log_level);
 
-        $this->extism->extism_log_file($filenamePtr, $log_levelPtr);
+        $this->ffi->extism_log_file($filenamePtr, $log_levelPtr);
     }
 
     function owned(string $type, string $string): FFI\CData|null
@@ -119,14 +119,14 @@ class LibExtism
             return null;
         }
 
-        $str = FFI::new($type . "[" . \strlen($string) . "]", true);
+        $str = $this->ffi->new($type . "[" . \strlen($string) . "]", true);
         FFI::memcpy($str, $string, \strlen($string));
         return $str;
     }
 
     function ownedZero(string $string): FFI\CData|null
     {
-        return self::owned("char", "$string\0");
+        return $this->owned("char", "$string\0");
     }
 
     function startsWith($haystack, $needle) {
