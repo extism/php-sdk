@@ -23,16 +23,15 @@ class ExtismValType {
 $wasm = new PathWasmSource("D:/dylibso/go-pdk/example/reactor/c.wasm");
 $manifest = new Manifest($wasm);
 
-$function = new HostFunction("echo", [ExtismValType::I64], [ExtismValType::I64], function(CurrentPlugin $currentPlugin, $ptr) {
-    $message = $currentPlugin->read_memory($ptr);
-    echo "USER: " . $message;
-    return $currentPlugin->write_memory("Hello from the other side!");
+$function = new HostFunction("echo", [ExtismValType::I64], [ExtismValType::I64], function(CurrentPlugin $currentPlugin, string $message) {
+    echo "Plugin says: " . $message;
+    return "Hello from the other side!";
 });
 
 $functions = [$function];
 
 $plugin = new Plugin($manifest, $functions, true);
-$output = $plugin->call("say_hello", "Yellow, World!");
+$output = $plugin->call("say_hello", "");
 
 
 // $manifest = new Manifest($wasm);

@@ -43,11 +43,13 @@ class HostFunction
 
             // TODO: do more validations on arguments vs inputs
 
+            $offs = 0;
             if (count($arguments) > 0) {
                 $type = $arguments[0]->getType();
                 if (($type != null && $type->getName() == "Extism\CurrentPlugin") ||
                     count($arguments) == $n_inputs + 1) {
                     array_push($params, $currentPlugin);
+                    $offs = 1;
                 }
             }
 
@@ -59,8 +61,15 @@ class HostFunction
                         array_push($params, $input->v->i32);
                         break;
                     case \ExtismValType::I64:
-                        // TODO: check if its a ptr to a string
-                        array_push($params, $input->v->i64);
+                        $type = $arguments[$i + $offs]->getType();
+
+                        if ($type != null && $type->getName() == "string") {
+                            $ptr = $input->v->i64;
+                            $str = $currentPlugin->read_memory($ptr);
+                            array_push($params, $str);
+                        } else {
+                            array_push($params, $input->v->i64);
+                        }
                         break;
                     case \ExtismValType::F32:
                         array_push($params, $input->v->f32);
@@ -74,6 +83,11 @@ class HostFunction
             }
 
             $r = $callback(...$params);
+
+            if (gettype($r) == "string") {
+                $r = $currentPlugin->write_memory($r);
+            }
+
             if ($n_outputs == 1) {
                 $output = $outputs[0];
 
