@@ -6,14 +6,14 @@ class LibExtism
 
     public function __construct() {
         $name = LibExtism::soname();
-        $this->extism = self::findSo($name);
+        $this->extism = LibExtism::findSo($name);
     }
 
     function findSo(string $name): FFI {
         $platform = php_uname("s");
 
         $directories = [];
-        if (self::startsWith($platform, "windows")) {
+        if (LibExtism::startsWith($platform, "windows")) {
             $path = getenv('PATH');
             $directories = explode(PATH_SEPARATOR, $path);
 
@@ -126,7 +126,7 @@ class LibExtism
 
     function ownedZero(string $string): FFI\CData|null
     {
-        return self::owned("char", "$string\0");
+        return $this->owned("char", "$string\0");
     }
 
     function startsWith($haystack, $needle) {
