@@ -9,16 +9,6 @@ use Extism\Plugin;
 require_once __DIR__ . "/../src/Plugin.php";
 require_once __DIR__ . "/../src/HostFunction.php";
 
-class ExtismValType {
-    public const I32 = 0;
-    public const I64 = 1;
-    public const F32 = 2;
-    public const F64 = 3;
-    public const V128 = 4;
-    public const FUNC_REF = 5;
-    public const EXTERN_REF = 6;
-}
-
 //$wasm = new UrlWasmSource("https://github.com/extism/plugins/releases/latest/download/count_vowels.wasm");
 $wasm = new PathWasmSource("D:/dylibso/go-pdk/example/reactor/c.wasm");
 $manifest = new Manifest($wasm);

@@ -153,7 +153,7 @@ class LibExtism
     function toCArray(array $array, string $type): FFI\CData | null
     {
         if (count($array) == 0) {
-            return null;
+            return $this->ffi->new($type . "*");
         }
 
         $cArray = $this->ffi->new($type . "[" . count($array) . "]");

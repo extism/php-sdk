@@ -36,7 +36,6 @@
     "files": [
       "src/Manifest.php",
       "src/Plugin.php",
-      "src/ReflectionUtils.php",
       "src/CurrentPlugin.php"
     ]
   },
