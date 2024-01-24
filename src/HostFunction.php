@@ -32,10 +32,15 @@ class HostFunction
      * @param array $outputTypes Array of output types
      * @param callable $callback Callback to invoke when the function is called
      * 
-     * @example location description
+     * @example ../tests/PluginTest.php 82 84 Simple Example
+     * @example ../tests/PluginTest.php 100 104 Manually read memory using CurrentPlugin
      */
     function __construct(string $name, array $inputTypes, array $outputTypes, callable $callback)
     {
+        $reflection = new \ReflectionFunction($callback);
+        $arguments = $reflection->getParameters();
+        $offset = HostFunction::validate_arguments($arguments, $inputTypes);
+
         global $lib;
 
         if ($lib == null) {
@@ -56,26 +61,13 @@ class HostFunction
             $outputs[$i] = $this->lib->ffi->cast("ExtismValType", $outputTypes[$i]);
         }
 
-        $func = function ($handle, $inputs, $n_inputs, $outputs, $n_outputs, $data) use ($callback, $lib) {
+        $func = function ($handle, $inputs, $n_inputs, $outputs, $n_outputs, $data) use ($callback, $lib, $arguments, $offset) {
             try {
-                $reflection = new \ReflectionFunction($callback);
-                $arguments = $reflection->getParameters();
                 $params = [];
 
                 $currentPlugin = new CurrentPlugin($lib, $handle);
-
-                // TODO: do more validations on arguments vs inputs
-
-                $offs = 0;
-                if (count($arguments) > 0) {
-                    $type = $arguments[0]->getType();
-                    if (
-                        ($type != null && $type->getName() == "Extism\CurrentPlugin") ||
-                        count($arguments) == $n_inputs + 1
-                    ) {
-                        array_push($params, $currentPlugin);
-                        $offs = 1;
-                    }
+                if ($offset == 1) {
+                    array_push($params, $currentPlugin);
                 }
 
                 for ($i = 0; $i < $n_inputs; $i++) {
@@ -86,9 +78,9 @@ class HostFunction
                             array_push($params, $input->v->i32);
                             break;
                         case ExtismValType::I64:
-                            $type = $arguments[$i + $offs]->getType();
+                            $type = HostFunction::get_type_name($arguments[$i + $offset]);
 
-                            if ($type != null && $type->getName() == "string") {
+                            if ($type != null && $type == "string") {
                                 $ptr = $input->v->i64;
                                 $str = $currentPlugin->read_block($ptr);
                                 array_push($params, $str);
@@ -136,10 +128,13 @@ class HostFunction
                             throw new \Exception("Unsupported type for output: " . $output->t);
                     }
                 }
-            } catch (\Throwable $e) { // For PHP 7
-                echo "Exception: " . $e->getMessage() . PHP_EOL;
-            } catch (\Exception $e) { // For PHP 5
-                echo "Exception: " . $e->getMessage() . PHP_EOL;
+            } catch (\Throwable $e) { // PHP 7+
+                HostFunction::print_exception($e);
+                throw $e; // TODO: is there a anything better we can do?
+
+            } catch (\Exception $e) { // PHP 5+
+                HostFunction::print_exception($e);
+                throw $e; // TODO: is there a anything better we can do?
             }
         };
 
@@ -152,5 +147,74 @@ class HostFunction
     function set_namespace(string $namespace)
     {
         $this->lib->extism_function_set_namespace($this->handle, $namespace);
+    }
+
+    private static function print_exception(\Throwable $e)
+    {
+        echo "Exception thrown in host function: " . $e->getMessage() . PHP_EOL;
+        echo $e->getTraceAsString() . PHP_EOL;
+        throw $e;
+    }
+
+    private static function get_type_name(\ReflectionParameter $param)
+    {
+        $type = $param->getType();
+        
+        if ($type == null) {
+            return null;
+        }
+
+        if ($type instanceof \ReflectionNamedType) {
+            return $type->getName();
+        }
+
+        return null;
+    }
+
+    private static function validate_arguments(array $arguments, array $inputTypes)
+    {
+        $offset = 0;
+        $n_arguments = count($arguments);
+
+        if ($n_arguments > 0 && HostFunction::get_type_name($arguments[0]) == "Extism\CurrentPlugin") {
+            $offset = 1;
+        }
+
+        if ($n_arguments - $offset != count($inputTypes)) {
+            throw new \Exception("Number of arguments does not match number of input types");
+        }
+
+        for ($i = $offset; $i < $n_arguments; $i++) {
+            $argType = HostFunction::get_type_name($arguments[$i]);
+
+            if ($argType == null) {
+                continue;
+            } else if ($argType == "string") {
+                // string is represented as a pointer to a block of memory
+                $argType = "int";
+            }
+
+            $inputType = $inputTypes[$i - $offset];
+
+            switch ($inputType) {
+                case ExtismValType::I32:
+                case ExtismValType::I64:
+                    if ($argType != "int") {
+                        throw new \Exception("Argument #$i is not an int");
+                    }
+                    break;
+                case ExtismValType::F32:
+                case ExtismValType::F64:
+                    if ($argType != "float") {
+                        throw new \Exception("Argument #$i is not a float");
+                    }
+                    break;
+
+                default:
+                    throw new \Exception("Unsupported type for argument #$i: " . $inputType);
+            }
+        }
+
+        return $offset;
     }
 }

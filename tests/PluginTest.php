@@ -1,5 +1,6 @@
 <?php declare(strict_types=1);
 
+use Extism\CurrentPlugin;
 use Extism\HostFunction;
 use PHPUnit\Framework\TestCase;
 use Extism\Plugin;
@@ -8,6 +9,7 @@ use Extism\ByteArrayWasmSource;
 use Extism\PathWasmSource;
 use Extism\UrlWasmSource;
 use Extism\ExtismValType;
+use SebastianBergmann\Type\VoidType;
 
 final class PluginTest extends TestCase
 {
@@ -77,7 +79,7 @@ final class PluginTest extends TestCase
     {
         $kvstore = [];
 
-        $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (string $key) use ($kvstore) {
+        $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (CurrentPlugin $p, string $key) use ($kvstore) {
             return $kvstore[$key] ?? "\0\0\0\0";
         });
 
@@ -89,6 +91,50 @@ final class PluginTest extends TestCase
 
         $response = $plugin->call("count_vowels", "Hello World!");
         $this->assertEquals('{"count":3,"total":3,"vowels":"aeiouAEIOU"}', $response);
+    }
+
+    public function testHostFunctionManual(): void
+    {
+        $kvstore = [];
+
+        $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (CurrentPlugin $p, int $keyPtr) use ($kvstore) {
+            $key = $p->read_block($keyPtr);
+            $value = $kvstore[$key] ?? "\0\0\0\0";
+            return $p->write_block($value);
+        });
+
+        $kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (CurrentPlugin $p, int $keyPtr, int $valuePtr) use ($kvstore) {
+            $key = $p->read_block($keyPtr);
+            $value = $p->read_block($valuePtr);
+            
+            $kvstore[$key] = $value;
+        });
+
+        $plugin = self::loadPlugin("count_vowels_kvstore.wasm", [$kvRead, $kvWrite]);
+
+        $response = $plugin->call("count_vowels", "Hello World!");
+        $this->assertEquals('{"count":3,"total":3,"vowels":"aeiouAEIOU"}', $response);
+    }
+
+    public function testHostFunctionNamespace(): VoidType
+    {
+        $this->expectExceptionMessage("Extism: unable to load plugin: Unable to create Extism plugin: unknown import: `extism:host/user::kv_read` has not been defined");
+
+        $kvstore = [];
+
+        $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (string $key) use ($kvstore) {
+            return $kvstore[$key] ?? "\0\0\0\0";
+        });
+
+        $kvRead->set_namespace("custom");
+
+        $kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (string $key, string $value) use ($kvstore) {
+            $kvstore[$key] = $value;
+        });
+
+        $kvRead->set_namespace("custom");
+
+        $plugin = self::loadPlugin("count_vowels_kvstore.wasm", [$kvRead, $kvWrite]);
     }
 
     public static function loadPlugin(string $name, array $functions, ?callable $config = null)
