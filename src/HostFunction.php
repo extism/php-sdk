@@ -63,42 +63,8 @@ class HostFunction
 
         $func = function ($handle, $inputs, $n_inputs, $outputs, $n_outputs, $data) use ($callback, $lib, $arguments, $offset) {
             try {
-                $params = [];
-
                 $currentPlugin = new CurrentPlugin($lib, $handle);
-                if ($offset == 1) {
-                    array_push($params, $currentPlugin);
-                }
-
-                for ($i = 0; $i < $n_inputs; $i++) {
-                    $input = $inputs[$i];
-
-                    switch ($input->t) {
-                        case ExtismValType::I32:
-                            array_push($params, $input->v->i32);
-                            break;
-                        case ExtismValType::I64:
-                            $type = HostFunction::get_type_name($arguments[$i + $offset]);
-
-                            if ($type != null && $type == "string") {
-                                $ptr = $input->v->i64;
-                                $str = $currentPlugin->read_block($ptr);
-                                array_push($params, $str);
-                            } else {
-                                array_push($params, $input->v->i64);
-                            }
-
-                            break;
-                        case ExtismValType::F32:
-                            array_push($params, $input->v->f32);
-                            break;
-                        case ExtismValType::F64:
-                            array_push($params, $input->v->f64);
-                            break;
-                        default:
-                            throw new \Exception("Unsupported type for parametr #$i: " . $input->t);
-                    }
-                }
+                $params = HostFunction::get_parameters($currentPlugin, $inputs, $n_inputs, $arguments, $offset);
 
                 $r = $callback(...$params);
 
@@ -159,7 +125,7 @@ class HostFunction
     private static function get_type_name(\ReflectionParameter $param)
     {
         $type = $param->getType();
-        
+
         if ($type == null) {
             return null;
         }
@@ -169,6 +135,52 @@ class HostFunction
         }
 
         return null;
+    }
+
+    private static function get_parameters(
+        CurrentPlugin $currentPlugin, 
+        \FFI\CData $inputs,
+        int $n_inputs,
+        array $arguments, 
+        int $offset) : array
+    {
+        $params = [];
+
+        if ($offset == 1) {
+            array_push($params, $currentPlugin);
+        }
+
+        for ($i = 0; $i < $n_inputs; $i++) {
+            $input = $inputs[$i];
+
+            switch ($input->t) {
+                case ExtismValType::I32:
+                    array_push($params, $input->v->i32);
+                    break;
+                case ExtismValType::I64:
+                    $type = HostFunction::get_type_name($arguments[$i + $offset]);
+
+                    if ($type != null && $type == "string") {
+                        $ptr = $input->v->i64;
+                        $str = $currentPlugin->read_block($ptr);
+                        array_push($params, $str);
+                    } else {
+                        array_push($params, $input->v->i64);
+                    }
+
+                    break;
+                case ExtismValType::F32:
+                    array_push($params, $input->v->f32);
+                    break;
+                case ExtismValType::F64:
+                    array_push($params, $input->v->f64);
+                    break;
+                default:
+                    throw new \Exception("Unsupported type for parametr #$i: " . $input->t);
+            }
+        }
+
+        return $params;
     }
 
     private static function validate_arguments(array $arguments, array $inputTypes)
