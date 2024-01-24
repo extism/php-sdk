@@ -15,14 +15,15 @@ class Plugin
      * 
      * @param string $bytes Wasm binary
      * @param bool $with_wasi Enable WASI
+     * @param array $functions Array of host functions
      * 
      */
-    public static function fromBytes(string $bytes, bool $with_wasi = false): self
+    public static function fromBytes(string $bytes, bool $with_wasi = false, array $functions = []): self
     {
         $byteSource = new ByteArrayWasmSource($bytes);
         $manifest = new Manifest($byteSource);
 
-        return new self($manifest, [], $with_wasi);
+        return new self($manifest, $with_wasi, $functions);
     }
 
     /**
@@ -30,8 +31,9 @@ class Plugin
      * 
      * @param Manifest $manifest A manifest that describes the Wasm binaries and configures permissions.
      * @param bool $with_wasi Enable WASI
+     * @param array $functions Array of host functions
      */
-    public function __construct(Manifest $manifest, array $functions, bool $with_wasi = false)
+    public function __construct(Manifest $manifest, bool $with_wasi = false, array $functions = [])
     {
         global $lib;
 

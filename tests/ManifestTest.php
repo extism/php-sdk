@@ -15,7 +15,7 @@ final class ManifestTest extends TestCase
         $wasm = new ByteArrayWasmSource($bytes, "main");
         $manifest = new Manifest($wasm);
 
-        $plugin = new Plugin($manifest, [], true);
+        $plugin = new Plugin($manifest, true, []);
 
         $actual = $plugin->call("run_test", "");
         $this->assertEquals("Hello, world!", $actual);
@@ -26,7 +26,7 @@ final class ManifestTest extends TestCase
         $wasm = new PathWasmSource(__DIR__ . "/../wasm/hello.wasm");
         $manifest = new Manifest($wasm);
 
-        $plugin = new Plugin($manifest, [], true);
+        $plugin = new Plugin($manifest, true, []);
 
         $actual = $plugin->call("run_test", "");
         $this->assertEquals("Hello, world!", $actual);
@@ -37,7 +37,7 @@ final class ManifestTest extends TestCase
         $wasm = new UrlWasmSource("https://github.com/extism/plugins/releases/download/v0.5.0/count_vowels.wasm");
         $manifest = new Manifest($wasm);
 
-        $plugin = new Plugin($manifest, [], true);
+        $plugin = new Plugin($manifest, true, []);
 
         $response = $plugin->call("count_vowels", "Hello World!");
         $actual = json_decode($response);
@@ -94,7 +94,7 @@ final class ManifestTest extends TestCase
             $config($manifest);
         }
     
-        return new Plugin($manifest, [], true);
+        return new Plugin($manifest, true, []);
     }
 }
 

@@ -106,7 +106,7 @@ final class PluginTest extends TestCase
         $kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (CurrentPlugin $p, int $keyPtr, int $valuePtr) use ($kvstore) {
             $key = $p->read_block($keyPtr);
             $value = $p->read_block($valuePtr);
-            
+
             $kvstore[$key] = $value;
         });
 
@@ -146,8 +146,6 @@ final class PluginTest extends TestCase
             $config($manifest);
         }
 
-        return new Plugin($manifest, $functions, true);
+        return new Plugin($manifest, true, $functions);
     }
 }
-
-?>
