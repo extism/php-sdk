@@ -77,11 +77,11 @@ final class PluginTest extends TestCase
     {
         $kvstore = [];
 
-        $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (string $key) use ($kvstore): string {
+        $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (string $key) use ($kvstore) {
             return $kvstore[$key] ?? "\0\0\0\0";
         });
 
-        $kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (string $key, string $value) use ($kvstore): void {
+        $kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (string $key, string $value) use ($kvstore) {
             $kvstore[$key] = $value;
         });
 
