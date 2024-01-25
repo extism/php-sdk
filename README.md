@@ -116,7 +116,7 @@ Wasm can't use our KV store on it's own. This is where `Host Functions` come in.
 
 Let's load the manifest like usual but load up this `count_vowels_kvstore` plug-in:
 
-```csharp
+```php
 $manifest = new Manifest(new UrlWasmSource("https://github.com/extism/plugins/releases/latest/download/count_vowels_kvstore.wasm"));
 ```
 
