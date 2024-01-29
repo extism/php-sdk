@@ -178,3 +178,15 @@ echo($output . PHP_EOL);
 // => Writing value=6 from key=count-vowels"
 // => {"count": 3, "total": 6, "vowels": "aeiouAEIOU"}
 ```
+
+For host function callbacks, these are the valid parameter types:
+ - `CurrentPlugin`: Only if its the first parameter. Allows you to manually manage memory. Optional.
+ - `string`: If the parameter represents a memory offset (an `i64`), then the SDK can automatically load the buffer into a `string` for you.
+ - `int`: For `i32` and `i64` parameters.
+ - `float`: For `f32` and `f64` parameters.
+
+Valid return types:
+ - `void`
+ - `int`: For `i32` and `i64` parameters.
+ - `float`: For `f32` and `f64` parameters.
+ - `string`: the content of the string will be allocated in the wasm plugin memory and the offset (`i64`) will be returned.
