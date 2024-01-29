@@ -108,6 +108,10 @@ $output = $plugin->call("count_vowels", "Yellow, World!");
 
 ### Host Functions
 
+> **Note**
+>
+> Host Functions support is experimental. Due to usage of callbacks with FFI, It may leak memory.
+
 Let's extend our count-vowels example a little bit: Instead of storing the `total` in an ephemeral plug-in var, let's store it in a persistent key-value store!
 
 Wasm can't use our KV store on it's own. This is where `Host Functions` come in.
