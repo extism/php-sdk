@@ -2,14 +2,14 @@
 
 class LibExtism
 {
-    public FFI $ffi;
+    public \FFI $ffi;
 
     public function __construct() {
         $name = LibExtism::soname();
         $this->ffi = LibExtism::findSo($name);
     }
 
-    function findSo(string $name): FFI {
+    function findSo(string $name): \FFI {
         $platform = php_uname("s");
         
         $directories = [];
@@ -26,7 +26,7 @@ class LibExtism
             $fullPath = $directory . DIRECTORY_SEPARATOR . $name;
 
             if (file_exists($fullPath)) {
-                return FFI::cdef(
+                return \FFI::cdef(
                     file_get_contents(__DIR__ . "/extism.h"),
                     $fullPath
                 );
@@ -120,7 +120,7 @@ class LibExtism
         return FFI::string($ptr, $length);
     }
 
-    function extism_plugin_free(FFI\CData $plugin): void
+    function extism_plugin_free(\FFI\CData $plugin): void
     {
         $this->ffi->extism_plugin_free($plugin);
     }
@@ -140,8 +140,12 @@ class LibExtism
 
         $handle = $this->ffi->extism_function_new($name, $inputs, count($inputTypes), $outputs, count($outputTypes), $callback, $userData, $freeUserData);
 
-        // TODO: do we need to free inputs and outputs?
         return $handle;
+    }
+
+    function extism_function_free(FFI\CData $handle): void
+    {
+        $this->ffi->extism_function_free($handle);
     }
 
     function extism_function_set_namespace(FFI\CData $handle, string $name)

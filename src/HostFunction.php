@@ -94,13 +94,14 @@ class HostFunction
                             throw new \Exception("Unsupported type for output: " . $output->t);
                     }
                 }
+            
+                // Throwing an exception in FFI callback is not supported and
+                // causes a fatal error without a stack trace.
+                // So we catch it and print the exception manually
             } catch (\Throwable $e) { // PHP 7+
                 HostFunction::print_exception($e);
-                throw $e; // TODO: is there a anything better we can do?
-
             } catch (\Exception $e) { // PHP 5+
                 HostFunction::print_exception($e);
-                throw $e; // TODO: is there a anything better we can do?
             }
         };
 
@@ -108,6 +109,11 @@ class HostFunction
 
         $this->handle = $this->lib->extism_function_new($name, $inputs, $outputs, $func, null, null);
         $this->set_namespace("extism:host/user");
+    }
+
+    function __destruct()
+    {
+        $this->lib->extism_function_free($this->handle);
     }
 
     function set_namespace(string $namespace)
