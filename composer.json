@@ -35,7 +35,8 @@
     },
     "files": [
       "src/Manifest.php",
-      "src/Plugin.php"
+      "src/Plugin.php",
+      "src/CurrentPlugin.php"
     ]
   },
   "autoload-dev": {

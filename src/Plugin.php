@@ -15,14 +15,15 @@ class Plugin
      * 
      * @param string $bytes Wasm binary
      * @param bool $with_wasi Enable WASI
+     * @param array $functions Array of host functions
      * 
      */
-    public static function fromBytes(string $bytes, bool $with_wasi = false): self
+    public static function fromBytes(string $bytes, bool $with_wasi = false, array $functions = []): self
     {
         $byteSource = new ByteArrayWasmSource($bytes);
         $manifest = new Manifest($byteSource);
 
-        return new self($manifest, $with_wasi);
+        return new self($manifest, $with_wasi, $functions);
     }
 
     /**
@@ -30,8 +31,9 @@ class Plugin
      * 
      * @param Manifest $manifest A manifest that describes the Wasm binaries and configures permissions.
      * @param bool $with_wasi Enable WASI
+     * @param array $functions Array of host functions
      */
-    public function __construct(Manifest $manifest, bool $with_wasi = false)
+    public function __construct(Manifest $manifest, bool $with_wasi = false, array $functions = [])
     {
         global $lib;
 
@@ -40,6 +42,12 @@ class Plugin
         }
 
         $this->lib = $lib;
+
+        $functionHandles = array_map(function($function) {
+            return $function->handle;
+        }, $functions);
+
+        $functionHandles = $this->lib->toCArray($functionHandles, "ExtismFunction*");
 
         $data = json_encode($manifest);
 
@@ -50,7 +58,7 @@ class Plugin
         }
 
         $errPtr = $lib->ffi->new($lib->ffi->type("char*"));
-        $handle = $this->lib->extism_plugin_new($data, strlen($data), [], 0, $with_wasi, \FFI::addr($errPtr));
+        $handle = $this->lib->extism_plugin_new($data, strlen($data), $functionHandles, count($functions), $with_wasi, \FFI::addr($errPtr));
 
         if (\FFI::isNull($errPtr) == false) {
             $error = \FFI::string($errPtr);

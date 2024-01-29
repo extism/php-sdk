@@ -2,16 +2,16 @@
 
 class LibExtism
 {
-    public FFI $ffi;
+    public \FFI $ffi;
 
     public function __construct() {
         $name = LibExtism::soname();
         $this->ffi = LibExtism::findSo($name);
     }
 
-    function findSo(string $name): FFI {
+    function findSo(string $name): \FFI {
         $platform = php_uname("s");
-
+        
         $directories = [];
         if (LibExtism::startsWith($platform, "windows")) {
             $path = getenv('PATH');
@@ -26,7 +26,7 @@ class LibExtism
             $fullPath = $directory . DIRECTORY_SEPARATOR . $name;
 
             if (file_exists($fullPath)) {
-                return FFI::cdef(
+                return \FFI::cdef(
                     file_get_contents(__DIR__ . "/extism.h"),
                     $fullPath
                 );
@@ -52,11 +52,31 @@ class LibExtism
         }
     }
 
-    function extism_plugin_new(string $wasm, int $wasm_size, array $functions, int $n_functions, bool $with_wasi, ?FFI\CData $errmsg): FFI\CData|null
+    function extism_current_plugin_memory(FFI\CData $plugin): \FFI\CData
+    {
+        return $this->ffi->extism_current_plugin_memory($plugin);
+    }
+
+    function extism_current_plugin_memory_free(FFI\CData $plugin, FFI\CData $ptr): void
+    {
+        $this->ffi->extism_current_plugin_memory_free($plugin, $ptr);
+    }
+
+    function extism_current_plugin_memory_alloc(FFI\CData $plugin, int $size): int
+    {
+        return $this->ffi->extism_current_plugin_memory_alloc($plugin, $size);
+    }
+
+    function extism_current_plugin_memory_length(FFI\CData $plugin, int $offset): int
+    {
+        return $this->ffi->extism_current_plugin_memory_length($plugin, $offset);
+    }
+
+    function extism_plugin_new(string $wasm, int $wasm_size, FFI\CData $functions, int $n_functions, bool $with_wasi, ?FFI\CData $errmsg): FFI\CData|null
     {
         $ptr = $this->owned("uint8_t", $wasm);
         $wasi = $with_wasi ? 1 : 0;
-        $pluginPtr = $this->ffi->extism_plugin_new($ptr, $wasm_size, null, $n_functions, $wasi, $errmsg);
+        $pluginPtr = $this->ffi->extism_plugin_new($ptr, $wasm_size, $functions, $n_functions, $wasi, $errmsg);
 
         return $this->ffi->cast("ExtismPlugin*", $pluginPtr);
     }
@@ -100,7 +120,7 @@ class LibExtism
         return FFI::string($ptr, $length);
     }
 
-    function extism_plugin_free(FFI\CData $plugin): void
+    function extism_plugin_free(\FFI\CData $plugin): void
     {
         $this->ffi->extism_plugin_free($plugin);
     }
@@ -111,6 +131,41 @@ class LibExtism
         $log_levelPtr = $this->ownedZero($log_level);
 
         $this->ffi->extism_log_file($filenamePtr, $log_levelPtr);
+    }
+
+    function extism_function_new(string $name, array $inputTypes, array $outputTypes, callable $callback, $userData, $freeUserData) : \FFI\CData
+    {
+        $inputs = $this->toCArray($inputTypes, "ExtismValType");
+        $outputs = $this->toCArray($outputTypes, "ExtismValType");
+
+        $handle = $this->ffi->extism_function_new($name, $inputs, count($inputTypes), $outputs, count($outputTypes), $callback, $userData, $freeUserData);
+
+        return $handle;
+    }
+
+    function extism_function_free(FFI\CData $handle): void
+    {
+        $this->ffi->extism_function_free($handle);
+    }
+
+    function extism_function_set_namespace(FFI\CData $handle, string $name)
+    {
+        $namePtr = $this->ownedZero($name);
+        $this->ffi->extism_function_set_namespace($handle, $namePtr);
+    }
+
+    function toCArray(array $array, string $type): FFI\CData | null
+    {
+        if (count($array) == 0) {
+            return $this->ffi->new($type . "*");
+        }
+
+        $cArray = $this->ffi->new($type . "[" . count($array) . "]");
+        for ($i = 0; $i < count($array); $i++) {
+            $cArray[$i] = $array[$i];
+        }
+
+        return $cArray;
     }
 
     function owned(string $type, string $string): FFI\CData|null

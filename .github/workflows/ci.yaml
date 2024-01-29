@@ -13,8 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        rust:
-          - stable
+        php: ['8.3']
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
@@ -22,7 +21,7 @@ jobs:
       - name: Setup PHP env
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: ${{ matrix.php }}
           extensions: ffi
           tools: composer
         env:
