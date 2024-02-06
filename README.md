@@ -126,7 +126,7 @@ $manifest = new Manifest(new UrlWasmSource("https://github.com/extism/plugins/re
 
 > *Note*: The source code for this is [here](https://github.com/extism/plugins/blob/main/count_vowels_kvstore/src/lib.rs) and is written in rust, but it could be written in any of our PDK languages.
 
-Unlike our previous plug-in, this plug-in expects you to provide host functions that satisfy our its import interface for a KV store.
+Unlike our previous plug-in, this plug-in expects you to provide host functions that satisfy our import interface for a KV store.
 
 We want to expose two functions to our plugin, `void kv_write(key string, value byte[])` which writes a bytes value to a key and `byte[] kv_read(key string)` which reads the bytes at the given `key`.
 
