@@ -116,7 +116,7 @@ Let's extend our count-vowels example a little bit: Instead of storing the `tota
 
 Wasm can't use our KV store on it's own. This is where `Host Functions` come in.
 
-[Host functions](https://extism.org/docs/concepts/host-functions) allow us to grant new capabilities to our plug-ins from our application. They are simply some Go functions you write which can be passed down and invoked from any language inside the plug-in.
+[Host functions](https://extism.org/docs/concepts/host-functions) allow us to grant new capabilities to our plug-ins from our application. They are simply some PHP functions you write which can be passed down and invoked from any language inside the plug-in.
 
 Let's load the manifest like usual but load up this `count_vowels_kvstore` plug-in:
 
