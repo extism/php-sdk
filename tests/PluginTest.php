@@ -63,7 +63,7 @@ final class PluginTest extends TestCase
             $manifest->allowed_paths = ["tests/data" => "/mnt"];
         });
 
-        $response = $plugin->call("run_test", "");
+        $response = $plugin->call("_start", "");
         $this->assertEquals("hello world!", $response);
     }
 
