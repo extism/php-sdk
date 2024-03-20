@@ -78,6 +78,20 @@ class MemoryOptions
      * @var int
      */
     public $max_pages;
+
+    /**
+     * Max number of bytes returned by `extism_http_request`
+     *
+     * @var int
+     */
+    public $max_http_response_bytes;
+
+    /**
+     * Max number of bytes allowed in the Extism var store
+     *
+     * @var int
+     */
+    public $max_var_bytes;
 }
 
 /**
