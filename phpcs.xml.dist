@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<ruleset name="extism-php-sdk">
+    <rule ref="PSR12">
+        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"/>
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+</ruleset>

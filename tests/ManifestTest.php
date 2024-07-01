@@ -1,11 +1,15 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
+namespace Extism\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Extism\Plugin;
 use Extism\Manifest;
-use Extism\ByteArrayWasmSource;
-use Extism\PathWasmSource;
-use Extism\UrlWasmSource;
+use Extism\Manifest\ByteArrayWasmSource;
+use Extism\Manifest\PathWasmSource;
+use Extism\Manifest\UrlWasmSource;
 
 final class ManifestTest extends TestCase
 {
@@ -65,7 +69,7 @@ final class ManifestTest extends TestCase
 
     public function testCanMakeHttpCallsWhenAllowed(): void
     {
-        $plugin = self::loadPlugin("http.wasm", function($manifest) {
+        $plugin = self::loadPlugin("http.wasm", function ($manifest) {
             $manifest->allowed_hosts = ["jsonplaceholder.*.com"];
         });
 
@@ -89,13 +93,11 @@ final class ManifestTest extends TestCase
     {
         $path = __DIR__ . '/../wasm/' . $name;
         $manifest = new Manifest(new PathWasmSource($path, 'main'));
-    
+
         if ($config !== null) {
             $config($manifest);
         }
-    
+
         return new Plugin($manifest, true, []);
     }
 }
-
-?>

@@ -1,9 +1,10 @@
 <?php
-use Extism\UrlWasmSource;
-use Extism\Manifest;
-use Extism\Plugin;
 
-require_once __DIR__ . "/../src/Plugin.php";
+use Extism\Plugin;
+use Extism\Manifest;
+use Extism\Manifest\UrlWasmSource;
+
+require "../vendor/autoload.php";
 
 $wasm = new UrlWasmSource("https://github.com/extism/plugins/releases/latest/download/count_vowels.wasm");
 $manifest = new Manifest($wasm);
