@@ -45,7 +45,7 @@ class CurrentPlugin
      *
      * @param int $size Size of the block to allocate in bytes.
      */
-    public function allocate_block(int $size): int
+    private function allocate_block(int $size): int
     {
         return $this->lib->extism_current_plugin_memory_alloc($this->handle, $size);
     }
@@ -55,7 +55,7 @@ class CurrentPlugin
      *
      * @param string $data Buffer to write to the plugin's memory.
      */
-    private function write_block(string $data): int
+    public function write_block(string $data): int
     {
         $offset = $this->allocate_block(strlen($data));
         $this->fill_block($offset, $data);
