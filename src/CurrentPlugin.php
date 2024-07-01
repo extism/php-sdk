@@ -55,7 +55,7 @@ class CurrentPlugin
      *
      * @param string $data Buffer to write to the plugin's memory.
      */
-    public function write_block(string $data): int
+    private function write_block(string $data): int
     {
         $offset = $this->allocate_block(strlen($data));
         $this->fill_block($offset, $data);
@@ -68,7 +68,7 @@ class CurrentPlugin
      * @param int $offset Offset of the block to fill.
      * @param string $data Buffer to fill the block with.
      */
-    public function fill_block(int $offset, string $data): void
+    private function fill_block(int $offset, string $data): void
     {
         $ptr = $this->lib->extism_current_plugin_memory($this->handle);
         $ptr = $this->lib->ffi->cast("char *", $ptr);
@@ -82,7 +82,7 @@ class CurrentPlugin
      *
      * @param int $offset Offset of the block to free.
      */
-    public function free_block(int $offset): void
+    private function free_block(int $offset): void
     {
         $this->lib->extism_current_plugin_memory_free($this->handle, $offset);
     }
