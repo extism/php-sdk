@@ -10,7 +10,7 @@
 #define EXTISM_SUCCESS 0
 
 /** An alias for I64 to signify an Extism pointer */
-#define PTR I64
+#define EXTISM_PTR ExtismValType_I64
 
 
 /**
@@ -20,31 +20,31 @@ typedef enum {
   /**
    * Signed 32 bit integer.
    */
-  I32,
+  ExtismValType_I32,
   /**
    * Signed 64 bit integer.
    */
-  I64,
+  ExtismValType_I64,
   /**
    * Floating point 32 bit integer.
    */
-  F32,
+  ExtismValType_F32,
   /**
    * Floating point 64 bit integer.
    */
-  F64,
+  ExtismValType_F64,
   /**
    * A 128 bit number.
    */
-  V128,
+  ExtismValType_V128,
   /**
    * A reference to a Wasm function.
    */
-  FuncRef,
+  ExtismValType_FuncRef,
   /**
    * A reference to opaque data in the Wasm instance.
    */
-  ExternRef,
+  ExtismValType_ExternRef,
 } ExtismValType;
 
 /**
@@ -109,6 +109,12 @@ typedef void (*ExtismLogDrainFunctionType)(const char *data, ExtismSize size);
  * Get a plugin's ID, the returned bytes are a 16 byte buffer that represent a UUIDv4
  */
 const uint8_t *extism_plugin_id(ExtismPlugin *plugin);
+
+/**
+ * Get the current plugin's associated host context data. Returns null if call was made without
+ * host context.
+ */
+void *extism_current_plugin_host_context(ExtismCurrentPlugin *plugin);
 
 /**
  * Returns a pointer to the memory of the currently running plugin
@@ -227,6 +233,20 @@ int32_t extism_plugin_call(ExtismPlugin *plugin,
                            const char *func_name,
                            const uint8_t *data,
                            ExtismSize data_len);
+
+/**
+ * Call a function with host context.
+ *
+ * `func_name`: is the function to call
+ * `data`: is the input data
+ * `data_len`: is the length of `data`
+ * `host_context`: a pointer to context data that will be available in host functions
+ */
+int32_t extism_plugin_call_with_host_context(ExtismPlugin *plugin,
+                                             const char *func_name,
+                                             const uint8_t *data,
+                                             ExtismSize data_len,
+                                             void *host_context);
 
 /**
  * Get the error associated with a `Plugin`
