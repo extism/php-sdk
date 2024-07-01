@@ -43,7 +43,7 @@ class Plugin
 
         $this->lib = $lib;
 
-        $functionHandles = array_map(function($function) {
+        $functionHandles = array_map(function ($function) {
             return $function->handle;
         }, $functions);
 
@@ -97,16 +97,14 @@ class Plugin
      * 
      * @return string Output buffer
      */
-    public function call(string $name, string $input = null) : string
+    public function call(string $name, string $input = null): string
     {
         $rc = $this->lib->extism_plugin_call($this->handle, $name, $input, strlen($input));
 
-        if ($rc != 0) {
-            $msg = "code = " . $rc;
-            $err = $this->lib->extism_error($this->handle);
-            if ($err) {
-                $msg = $msg . ", error = " . $err;
-            }
+        $msg = "code = " . $rc;
+        $err = $this->lib->extism_error($this->handle);
+        if ($err) {
+            $msg = $msg . ", error = " . $err;
             throw new \Exception("Extism: call to '" . $name . "' failed with " . $msg);
         }
 
@@ -120,16 +118,16 @@ class Plugin
      * @param string $level Minimum log level. Valid values are: `trace`, `debug`, `info`, `warn`, `error`
      * or more complex filter like `extism=trace,cranelift=debug`.
      */
-    public static function setLogFile(string $filename, string $level) : void
+    public static function setLogFile(string $filename, string $level): void
     {
         $lib = new \LibExtism();
         $lib->extism_log_file($filename, $level);
     }
 
     /**
-    * Get the Extism version string
-    * @return string
-    */
+     * Get the Extism version string
+     * @return string
+     */
     public static function version()
     {
         $lib = new \LibExtism();
