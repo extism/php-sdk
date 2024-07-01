@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Extism;
 
-require_once __DIR__ . "/LibExtism.php";
-require_once __DIR__ . "/Manifest.php";
+use Extism\Manifest\ByteArrayWasmSource;
 
 class Plugin
 {
@@ -12,11 +13,11 @@ class Plugin
 
     /**
      * Initialize a plugin from a byte array.
-     * 
+     *
      * @param string $bytes Wasm binary
      * @param bool $with_wasi Enable WASI
      * @param array $functions Array of host functions
-     * 
+     *
      */
     public static function fromBytes(string $bytes, bool $with_wasi = false, array $functions = []): self
     {
@@ -28,7 +29,7 @@ class Plugin
 
     /**
      * Constructor
-     * 
+     *
      * @param Manifest $manifest A manifest that describes the Wasm binaries and configures permissions.
      * @param bool $with_wasi Enable WASI
      * @param array $functions Array of host functions
@@ -43,7 +44,7 @@ class Plugin
 
         $this->lib = $lib;
 
-        $functionHandles = array_map(function($function) {
+        $functionHandles = array_map(function ($function) {
             return $function->handle;
         }, $functions);
 
@@ -79,9 +80,9 @@ class Plugin
 
     /**
      * Check if the plugin contains a function.
-     * 
+     *
      * @param string $name
-     * 
+     *
      * @return bool `true` if the function exists, `false` otherwise
      */
     public function functionExists(string $name)
@@ -91,13 +92,13 @@ class Plugin
 
     /**
      * Call a function in the Plugin and return the result.
-     * 
+     *
      * @param string $name Name of function.
      * @param string $input Input buffer
-     * 
+     *
      * @return string Output buffer
      */
-    public function call(string $name, string $input = null) : string
+    public function call(string $name, string $input = null): string
     {
         $rc = $this->lib->extism_plugin_call($this->handle, $name, $input, strlen($input));
 
@@ -115,12 +116,12 @@ class Plugin
 
     /**
      * Configures file logging. This applies to all Plugin instances.
-     * 
+     *
      * @param string $filename Path of log file. The file will be created if it doesn't exist.
      * @param string $level Minimum log level. Valid values are: `trace`, `debug`, `info`, `warn`, `error`
      * or more complex filter like `extism=trace,cranelift=debug`.
      */
-    public static function setLogFile(string $filename, string $level) : void
+    public static function setLogFile(string $filename, string $level): void
     {
         $lib = new \LibExtism();
         $lib->extism_log_file($filename, $level);
