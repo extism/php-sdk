@@ -74,7 +74,7 @@ class LibExtism
         return $this->ffi->extism_current_plugin_memory_length($plugin, $offset);
     }
 
-    public function extism_plugin_new(string $wasm, int $wasm_size, FFI\CData $functions, int $n_functions, bool $with_wasi, ?FFI\CData $errmsg): FFI\CData|null
+    public function extism_plugin_new(string $wasm, int $wasm_size, FFI\CData $functions, int $n_functions, bool $with_wasi, ?FFI\CData $errmsg): ?FFI\CData
     {
         $ptr = $this->owned("uint8_t", $wasm);
         $wasi = $with_wasi ? 1 : 0;
@@ -157,7 +157,7 @@ class LibExtism
         $this->ffi->extism_function_set_namespace($handle, $namePtr);
     }
 
-    public function toCArray(array $array, string $type): FFI\CData | null
+    public function toCArray(array $array, string $type): ?FFI\CData
     {
         if (count($array) == 0) {
             return $this->ffi->new($type . "*");
@@ -171,7 +171,7 @@ class LibExtism
         return $cArray;
     }
 
-    public function owned(string $type, string $string): FFI\CData|null
+    public function owned(string $type, string $string): ?FFI\CData
     {
         if (strlen($string) == 0) {
             return null;
@@ -182,7 +182,7 @@ class LibExtism
         return $str;
     }
 
-    public function ownedZero(string $string): FFI\CData|null
+    public function ownedZero(string $string): ?FFI\CData
     {
         return $this->owned("char", "$string\0");
     }

@@ -102,12 +102,10 @@ class Plugin
     {
         $rc = $this->lib->extism_plugin_call($this->handle, $name, $input, strlen($input));
 
-        if ($rc != 0) {
-            $msg = "code = " . $rc;
-            $err = $this->lib->extism_error($this->handle);
-            if ($err) {
-                $msg = $msg . ", error = " . $err;
-            }
+        $msg = "code = " . $rc;
+        $err = $this->lib->extism_error($this->handle);
+        if ($err) {
+            $msg = $msg . ", error = " . $err;
             throw new \Exception("Extism: call to '" . $name . "' failed with " . $msg);
         }
 
@@ -128,9 +126,9 @@ class Plugin
     }
 
     /**
-    * Get the Extism version string
-    * @return string
-    */
+     * Get the Extism version string
+     * @return string
+     */
     public static function version()
     {
         $lib = new \LibExtism();

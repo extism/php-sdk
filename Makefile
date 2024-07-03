@@ -4,7 +4,7 @@ prepare:
 	composer install
 
 test: prepare
-	php vendor/bin/phpunit ./tests --display-deprecations --display-warnings
+	php vendor/bin/phpunit ./tests
 
 cscheck:
 	vendor/bin/phpcs .
