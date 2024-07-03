@@ -17,13 +17,13 @@ class ExtismValType
     public const EXTERN_REF = 6;
 
     public const VAL_TYPE_MAP = [
-        0 => 'I32',
-        1 => 'I64',
-        2 => 'F32',
-        3 => 'F64',
-        4 => 'V128',
-        5 => 'FUNC_REF',
-        6 => 'EXTERN_REF',
+        0 => 'ExtismValType_I32',
+        1 => 'ExtismValType_I64',
+        2 => 'ExtismValType_F32',
+        3 => 'ExtismValType_F64',
+        4 => 'ExtismValType_V128',
+        5 => 'ExtismValType_Func_Ref',
+        6 => 'ExtismValType_Extern_Ref',
     ];
 }
 
