@@ -49,6 +49,6 @@
   "scripts": {},
   "scripts-descriptions": {},
   "require-dev": {
-    "phpunit/phpunit": "^10"
+    "phpunit/phpunit": "^9"
   }
 }

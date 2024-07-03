@@ -15,6 +15,16 @@ class ExtismValType
     public const V128 = 4;
     public const FUNC_REF = 5;
     public const EXTERN_REF = 6;
+
+    public const VAL_TYPE_MAP = [
+        0 => 'ExtismValType_I32',
+        1 => 'ExtismValType_I64',
+        2 => 'ExtismValType_F32',
+        3 => 'ExtismValType_F64',
+        4 => 'ExtismValType_V128',
+        5 => 'ExtismValType_Func_Ref',
+        6 => 'ExtismValType_Extern_Ref',
+    ];
 }
 
 class HostFunction
@@ -52,13 +62,15 @@ class HostFunction
         $inputs = [];
 
         for ($i = 0; $i < count($inputTypes); $i++) {
-            $inputs[$i] = $this->lib->ffi->cast("ExtismValType", $inputTypes[$i]);
+            $enum = ExtismValType::VAL_TYPE_MAP[$inputTypes[$i]];
+            $inputs[$i] = $this->lib->ffi->$enum;
         }
 
         $outputs = [];
 
         for ($i = 0; $i < count($outputTypes); $i++) {
-            $outputs[$i] = $this->lib->ffi->cast("ExtismValType", $outputTypes[$i]);
+            $enum = ExtismValType::VAL_TYPE_MAP[$outputTypes[$i]];
+            $outputs[$i] = $this->lib->ffi->$enum;
         }
 
         $func = function ($handle, $inputs, $n_inputs, $outputs, $n_outputs, $data) use ($callback, $lib, $arguments, $offset) {
