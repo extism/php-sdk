@@ -11,11 +11,11 @@ class LibExtism
         $this->ffi = LibExtism::findSo($name);
     }
 
-    public function findSo(string $name): \FFI
+    private function findSo(string $name): \FFI
     {
         $platform = php_uname("s");
         $directories = [];
-        if (LibExtism::startsWith($platform, "windows")) {
+        if ($this->startsWith($platform, "windows")) {
             $path = getenv('PATH');
             $directories = explode(PATH_SEPARATOR, $path);
         } else {
@@ -39,7 +39,7 @@ class LibExtism
         throw new \RuntimeException('Failed to find shared object. Searched locations: ' . implode(', ', $searchedPaths));
     }
 
-    public function soname()
+    private function soname()
     {
         $platform = php_uname("s");
         switch ($platform) {
@@ -109,7 +109,7 @@ class LibExtism
         return $this->ffi->extism_error($plugin);
     }
 
-    public function extism_plugin_error(FFI\CData $plugin): ?string
+    private function extism_plugin_error(FFI\CData $plugin): ?string
     {
         return $this->ffi->extism_plugin_error($plugin);
     }
@@ -171,7 +171,7 @@ class LibExtism
         return $cArray;
     }
 
-    public function owned(string $type, string $string): ?FFI\CData
+    private function owned(string $type, string $string): ?FFI\CData
     {
         if (strlen($string) == 0) {
             return null;
@@ -182,12 +182,12 @@ class LibExtism
         return $str;
     }
 
-    public function ownedZero(string $string): ?FFI\CData
+    private function ownedZero(string $string): ?FFI\CData
     {
         return $this->owned("char", "$string\0");
     }
 
-    public function startsWith($haystack, $needle)
+    private function startsWith($haystack, $needle)
     {
         return strcasecmp(substr($haystack, 0, strlen($needle)), $needle) === 0;
     }
