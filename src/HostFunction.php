@@ -1,10 +1,8 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Extism;
-
-require_once __DIR__ . "/LibExtism.php";
-require_once __DIR__ . "/CurrentPlugin.php";
-
 class ExtismValType
 {
     public const I32 = 0;
@@ -29,23 +27,23 @@ class ExtismValType
 
 class HostFunction
 {
-    private \LibExtism $lib;
+    private \Extism\Internal\LibExtism $lib;
     private $callback;
 
     public \FFI\CData $handle;
 
     /**
      * Constructor
-     * 
+     *
      * @param string $name Name of the function
      * @param array $inputTypes Array of input types. @see ExtismValType
      * @param array $outputTypes Array of output types
      * @param callable $callback Callback to invoke when the function is called
-     * 
+     *
      * @example ../tests/PluginTest.php 82 84 Simple Example
      * @example ../tests/PluginTest.php 100 104 Manually read memory using CurrentPlugin
      */
-    function __construct(string $name, array $inputTypes, array $outputTypes, callable $callback)
+    public function __construct(string $name, array $inputTypes, array $outputTypes, callable $callback)
     {
         $reflection = new \ReflectionFunction($callback);
         $arguments = $reflection->getParameters();
@@ -54,7 +52,7 @@ class HostFunction
         global $lib;
 
         if ($lib == null) {
-            $lib = new \LibExtism();
+            $lib = new \Extism\Internal\LibExtism();
         }
 
         $this->lib = $lib;
@@ -80,9 +78,9 @@ class HostFunction
 
                 $r = $callback(...$params);
 
-                if ($r == NULL) {
+                if ($r == null) {
                     $r = 0;
-                } else if (gettype($r) == "string") {
+                } elseif (gettype($r) == "string") {
                     $r = $currentPlugin->write_block($r);
                 }
 
@@ -106,7 +104,6 @@ class HostFunction
                             throw new \Exception("Unsupported type for output: " . $output->t);
                     }
                 }
-            
                 // Throwing an exception in FFI callback is not supported and
                 // causes a fatal error without a stack trace.
                 // So we catch it and print the exception manually
@@ -123,12 +120,12 @@ class HostFunction
         $this->set_namespace("extism:host/user");
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->lib->extism_function_free($this->handle);
     }
 
-    function set_namespace(string $namespace)
+    public function set_namespace(string $namespace)
     {
         $this->lib->extism_function_set_namespace($this->handle, $namespace);
     }
@@ -156,12 +153,12 @@ class HostFunction
     }
 
     private static function get_parameters(
-        CurrentPlugin $currentPlugin, 
+        CurrentPlugin $currentPlugin,
         \FFI\CData $inputs,
         int $n_inputs,
-        array $arguments, 
-        int $offset) : array
-    {
+        array $arguments,
+        int $offset
+    ): array {
         $params = [];
 
         if ($offset == 1) {
@@ -219,7 +216,7 @@ class HostFunction
 
             if ($argType == null) {
                 continue;
-            } else if ($argType == "string") {
+            } elseif ($argType == "string") {
                 // string is represented as a pointer to a block of memory
                 $argType = "int";
             }

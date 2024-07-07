@@ -41,7 +41,7 @@ First you should add a using statement for Extism:
 ```php
 use Extism\Plugin;
 use Extism\Manifest;
-use Extism\UrlWasmSource;
+use Extism\Manifest\UrlWasmSource;
 ```
 
 ## Creating A Plug-in
