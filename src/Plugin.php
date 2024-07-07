@@ -8,7 +8,7 @@ use Extism\Manifest\ByteArrayWasmSource;
 
 class Plugin
 {
-    private \LibExtism $lib;
+    private \Extism\Internal\LibExtism $lib;
     private \FFI\CData $handle;
 
     /**
@@ -39,17 +39,10 @@ class Plugin
         global $lib;
 
         if ($lib == null) {
-            $lib = new \LibExtism();
+            $lib = new \Extism\Internal\LibExtism();
         }
 
         $this->lib = $lib;
-
-        $functionHandles = array_map(function ($function) {
-            return $function->handle;
-        }, $functions);
-
-        $functionHandles = $this->lib->toCArray($functionHandles, "ExtismFunction*");
-
         $data = json_encode($manifest);
 
         if (!$data) {
@@ -59,7 +52,7 @@ class Plugin
         }
 
         $errPtr = $lib->ffi->new($lib->ffi->type("char*"));
-        $handle = $this->lib->extism_plugin_new($data, strlen($data), $functionHandles, count($functions), $with_wasi, \FFI::addr($errPtr));
+        $handle = $this->lib->extism_plugin_new($data, strlen($data), $functions, count($functions), $with_wasi, \FFI::addr($errPtr));
 
         if (\FFI::isNull($errPtr) == false) {
             $error = \FFI::string($errPtr);
@@ -121,7 +114,7 @@ class Plugin
      */
     public static function setLogFile(string $filename, string $level): void
     {
-        $lib = new \LibExtism();
+        $lib = new \Extism\Internal\LibExtism();
         $lib->extism_log_file($filename, $level);
     }
 
@@ -131,7 +124,7 @@ class Plugin
      */
     public static function version()
     {
-        $lib = new \LibExtism();
+        $lib = new \Extism\Internal\LibExtism();
         return $lib->extism_version();
     }
 }

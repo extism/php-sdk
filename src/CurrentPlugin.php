@@ -10,12 +10,12 @@ namespace Extism;
 class CurrentPlugin
 {
     private \FFI\CData $handle;
-    private \LibExtism $lib;
+    private \Extism\Internal\LibExtism $lib;
 
     /**
      * constructor.
      *
-     * @param \LibExtism $lib
+     * @param \Extism\Internal\LibExtism $lib
      * @param \FFI\CData $handle
      */
     public function __construct($lib, \FFI\CData $handle)

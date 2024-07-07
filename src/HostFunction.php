@@ -27,7 +27,7 @@ class ExtismValType
 
 class HostFunction
 {
-    private \LibExtism $lib;
+    private \Extism\Internal\LibExtism $lib;
     private $callback;
 
     public \FFI\CData $handle;
@@ -52,7 +52,7 @@ class HostFunction
         global $lib;
 
         if ($lib == null) {
-            $lib = new \LibExtism();
+            $lib = new \Extism\Internal\LibExtism();
         }
 
         $this->lib = $lib;

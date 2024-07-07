@@ -1,5 +1,7 @@
 <?php
 
+namespace Extism\Internal;
+
 // phpcs:ignore
 class LibExtism
 {
@@ -54,41 +56,47 @@ class LibExtism
         }
     }
 
-    public function extism_current_plugin_memory(FFI\CData $plugin): \FFI\CData
+    public function extism_current_plugin_memory(\FFI\CData $plugin): \FFI\CData
     {
         return $this->ffi->extism_current_plugin_memory($plugin);
     }
 
-    public function extism_current_plugin_memory_free(FFI\CData $plugin, FFI\CData $ptr): void
+    public function extism_current_plugin_memory_free(\FFI\CData $plugin, \FFI\CData $ptr): void
     {
         $this->ffi->extism_current_plugin_memory_free($plugin, $ptr);
     }
 
-    public function extism_current_plugin_memory_alloc(FFI\CData $plugin, int $size): int
+    public function extism_current_plugin_memory_alloc(\FFI\CData $plugin, int $size): int
     {
         return $this->ffi->extism_current_plugin_memory_alloc($plugin, $size);
     }
 
-    public function extism_current_plugin_memory_length(FFI\CData $plugin, int $offset): int
+    public function extism_current_plugin_memory_length(\FFI\CData $plugin, int $offset): int
     {
         return $this->ffi->extism_current_plugin_memory_length($plugin, $offset);
     }
 
-    public function extism_plugin_new(string $wasm, int $wasm_size, FFI\CData $functions, int $n_functions, bool $with_wasi, ?FFI\CData $errmsg): ?FFI\CData
+    public function extism_plugin_new(string $wasm, int $wasm_size, array $functions, int $n_functions, bool $with_wasi, ?\FFI\CData $errmsg): ?\FFI\CData
     {
+        $functionHandles = array_map(function ($function) {
+            return $function->handle;
+        }, $functions);
+
+        $functionHandles = $this->toCArray($functionHandles, "ExtismFunction*");
+
         $ptr = $this->owned("uint8_t", $wasm);
         $wasi = $with_wasi ? 1 : 0;
-        $pluginPtr = $this->ffi->extism_plugin_new($ptr, $wasm_size, $functions, $n_functions, $wasi, $errmsg);
+        $pluginPtr = $this->ffi->extism_plugin_new($ptr, $wasm_size, $functionHandles, $n_functions, $wasi, $errmsg);
 
         return $this->ffi->cast("ExtismPlugin*", $pluginPtr);
     }
 
-    public function extism_plugin_new_error_free(FFI\CData $ptr): void
+    public function extism_plugin_new_error_free(\FFI\CData $ptr): void
     {
         $this->ffi->extism_plugin_new_error_free($ptr);
     }
 
-    public function extism_plugin_function_exists(FFI\CData $plugin, string $func_name): bool
+    public function extism_plugin_function_exists(\FFI\CData $plugin, string $func_name): bool
     {
         return $this->ffi->extism_plugin_function_exists($plugin, $func_name);
     }
@@ -98,29 +106,29 @@ class LibExtism
         return $this->ffi->extism_version();
     }
 
-    public function extism_plugin_call(FFI\CData $plugin, string $func_name, string $data, int $data_len): int
+    public function extism_plugin_call(\FFI\CData $plugin, string $func_name, string $data, int $data_len): int
     {
         $dataPtr = $this->owned("uint8_t", $data);
         return $this->ffi->extism_plugin_call($plugin, $func_name, $dataPtr, $data_len);
     }
 
-    public function extism_error(FFI\CData $plugin): ?string
+    public function extism_error(\FFI\CData $plugin): ?string
     {
         return $this->ffi->extism_error($plugin);
     }
 
-    private function extism_plugin_error(FFI\CData $plugin): ?string
+    private function extism_plugin_error(\FFI\CData $plugin): ?string
     {
         return $this->ffi->extism_plugin_error($plugin);
     }
 
-    public function extism_plugin_output_data(FFI\CData $plugin): string
+    public function extism_plugin_output_data(\FFI\CData $plugin): string
     {
         $length = $this->ffi->extism_plugin_output_length($plugin);
 
         $ptr = $this->ffi->extism_plugin_output_data($plugin);
 
-        return FFI::string($ptr, $length);
+        return \FFI::string($ptr, $length);
     }
 
     public function extism_plugin_free(\FFI\CData $plugin): void
@@ -146,18 +154,18 @@ class LibExtism
         return $handle;
     }
 
-    public function extism_function_free(FFI\CData $handle): void
+    public function extism_function_free(\FFI\CData $handle): void
     {
         $this->ffi->extism_function_free($handle);
     }
 
-    public function extism_function_set_namespace(FFI\CData $handle, string $name)
+    public function extism_function_set_namespace(\FFI\CData $handle, string $name)
     {
         $namePtr = $this->ownedZero($name);
         $this->ffi->extism_function_set_namespace($handle, $namePtr);
     }
 
-    public function toCArray(array $array, string $type): ?FFI\CData
+    private function toCArray(array $array, string $type): ?\FFI\CData
     {
         if (count($array) == 0) {
             return $this->ffi->new($type . "*");
@@ -171,18 +179,18 @@ class LibExtism
         return $cArray;
     }
 
-    private function owned(string $type, string $string): ?FFI\CData
+    private function owned(string $type, string $string): ?\FFI\CData
     {
         if (strlen($string) == 0) {
             return null;
         }
 
         $str = $this->ffi->new($type . "[" . \strlen($string) . "]", true);
-        FFI::memcpy($str, $string, \strlen($string));
+        \FFI::memcpy($str, $string, \strlen($string));
         return $str;
     }
 
-    private function ownedZero(string $string): ?FFI\CData
+    private function ownedZero(string $string): ?\FFI\CData
     {
         return $this->owned("char", "$string\0");
     }
