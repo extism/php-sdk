@@ -1,6 +1,8 @@
 <?php
 
-class PluginLoadException extends Exception
+namespace Extism;
+
+class PluginLoadException extends \Exception
 {
     public function __construct(string $message)
     {

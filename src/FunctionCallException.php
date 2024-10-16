@@ -1,6 +1,8 @@
 <?php
 
-class ExtismCallException extends Exception
+namespace Extism;
+
+class FunctionCallException extends \Exception
 {
     public string $error;
     public string $functionName;

@@ -19,7 +19,7 @@ class PathWasmSource extends WasmSource
         $this->path = realpath($path);
 
         if (!$this->path) {
-            throw new \PluginLoadException("Path not found: '" . $path . "'");
+            throw new \Extism\PluginLoadException("Path not found: '" . $path . "'");
         }
 
         $this->name = $name ?? pathinfo($path, PATHINFO_FILENAME);
