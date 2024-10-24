@@ -57,7 +57,7 @@ class Plugin
         if (\FFI::isNull($errPtr) == false) {
             $error = \FFI::string($errPtr);
             $this->lib->extism_plugin_new_error_free($errPtr);
-            throw new \Exception("Extism: unable to load plugin: " . $error);
+            throw new \Extism\PluginLoadException("Extism: unable to load plugin: " . $error);
         }
 
         $this->handle = $handle;
@@ -93,13 +93,17 @@ class Plugin
      */
     public function call(string $name, string $input = null): string
     {
+        if ($input == null) {
+            $input = "";
+        }
+
         $rc = $this->lib->extism_plugin_call($this->handle, $name, $input, strlen($input));
 
         $msg = "code = " . $rc;
         $err = $this->lib->extism_error($this->handle);
         if ($err) {
             $msg = $msg . ", error = " . $err;
-            throw new \Exception("Extism: call to '" . $name . "' failed with " . $msg);
+            throw new \Extism\FunctionCallException("Extism: call to '" . $name . "' failed with " . $msg, $err, $name);
         }
 
         return $this->lib->extism_plugin_output_data($this->handle);

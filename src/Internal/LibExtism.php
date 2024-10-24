@@ -52,7 +52,7 @@ class LibExtism
             case "Windows NT":
                 return "extism.dll";
             default:
-                throw new \Exception("Extism: unsupported platform " . $platform);
+                throw new \RuntimeException("Extism: unsupported platform " . $platform);
         }
     }
 
