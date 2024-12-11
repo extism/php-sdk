@@ -101,6 +101,100 @@ class LibExtism
         return $this->ffi->extism_plugin_function_exists($plugin, $func_name);
     }
 
+    /**
+     * Create a new plugin from an ExtismCompiledPlugin
+     */
+    public function extism_plugin_new_from_compiled(\FFI\CData $compiled, \FFI\CData $errPtr): ?\FFI\CData
+    {
+        return $this->ffi->extism_plugin_new_from_compiled($compiled, $errPtr);
+    }
+
+    /**
+     * Create a new plugin with a fuel limit
+     */
+    public function extism_plugin_new_with_fuel_limit(string $wasm, int $wasm_size, \FFI\CData $functions, int $n_functions, bool $with_wasi, int $fuel_limit, \FFI\CData $errPtr): ?\FFI\CData
+    {
+        $ptr = $this->owned("uint8_t", $wasm);
+        $pluginPtr = $this->ffi->extism_plugin_new_with_fuel_limit($ptr, $wasm_size, $functions, $n_functions, $with_wasi ? 1 : 0, $fuel_limit, $errPtr);
+        return $this->ffi->cast("ExtismPlugin*", $pluginPtr);
+    }
+
+    /**
+     * Get handle for plugin cancellation
+     */
+    public function extism_plugin_cancel_handle(\FFI\CData $plugin): \FFI\CData
+    {
+        return $this->ffi->extism_plugin_cancel_handle($plugin);
+    }
+
+    /**
+     * Cancel a running plugin
+     */
+    public function extism_plugin_cancel(\FFI\CData $handle): bool
+    {
+        return $this->ffi->extism_plugin_cancel($handle);
+    }
+
+    /**
+     * Pre-compile an Extism plugin
+     */
+    public function extism_compiled_plugin_new(string $wasm, int $wasm_size, \FFI\CData $functions, int $n_functions, bool $with_wasi, \FFI\CData $errPtr): ?\FFI\CData
+    {
+        $ptr = $this->owned("uint8_t", $wasm);
+        $pluginPtr = $this->ffi->extism_compiled_plugin_new($ptr, $wasm_size, $functions, $n_functions, $with_wasi ? 1 : 0, $errPtr);
+        return $this->ffi->cast("ExtismCompiledPlugin*", $pluginPtr);
+    }
+
+    /**
+     * Free ExtismCompiledPlugin
+     */
+    public function extism_compiled_plugin_free(\FFI\CData $plugin): void
+    {
+        $this->ffi->extism_compiled_plugin_free($plugin);
+    }
+
+    /**
+     * Enable HTTP response headers in plugins
+     */
+    public function extism_plugin_allow_http_response_headers(\FFI\CData $plugin): void
+    {
+        $this->ffi->extism_plugin_allow_http_response_headers($plugin);
+    }
+
+    /**
+     * Get plugin's ID
+     */
+    public function extism_plugin_id(\FFI\CData $plugin): \FFI\CData
+    {
+        return $this->ffi->extism_plugin_id($plugin);
+    }
+
+    /**
+     * Update plugin config
+     */
+    public function extism_plugin_config(\FFI\CData $plugin, string $json, int $json_size): bool
+    {
+        $ptr = $this->owned("uint8_t", $json);
+        return $this->ffi->extism_plugin_config($plugin, $ptr, $json_size);
+    }
+
+    /**
+     * Call a function with host context
+     */
+    public function extism_plugin_call_with_host_context(\FFI\CData $plugin, string $func_name, string $data, int $data_len, $host_context): int
+    {
+        $dataPtr = $this->owned("uint8_t", $data);
+        return $this->ffi->extism_plugin_call_with_host_context($plugin, $func_name, $dataPtr, $data_len, $host_context);
+    }
+
+    /**
+     * Reset plugin
+     */
+    public function extism_plugin_reset(\FFI\CData $plugin): bool
+    {
+        return $this->ffi->extism_plugin_reset($plugin);
+    }
+
     public function extism_version(): string
     {
         return $this->ffi->extism_version();
