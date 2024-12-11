@@ -125,7 +125,7 @@ final class PluginTest extends TestCase
 
     public function testHostFunctionNamespace(): void
     {
-        $this->expectExceptionMessage("Extism: unable to load plugin: Unable to create Extism plugin: unknown import: `extism:host/user::kv_read` has not been defined");
+        $this->expectExceptionMessage("Extism: unable to load plugin: Unable to compile Extism plugin: unknown import: `extism:host/user::kv_read` has not been defined");
 
         $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (string $key) {
             //
@@ -135,7 +135,7 @@ final class PluginTest extends TestCase
         $kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (string $key, string $value) {
             //
         });
-        $kvRead->set_namespace("custom");
+        $kvWrite->set_namespace("custom");
 
         $plugin = self::loadPlugin("count_vowels_kvstore.wasm", [$kvRead, $kvWrite]);
     }
