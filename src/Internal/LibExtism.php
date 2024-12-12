@@ -112,10 +112,16 @@ class LibExtism
     /**
      * Create a new plugin with a fuel limit
      */
-    public function extism_plugin_new_with_fuel_limit(string $wasm, int $wasm_size, \FFI\CData $functions, int $n_functions, bool $with_wasi, int $fuel_limit, \FFI\CData $errPtr): ?\FFI\CData
+    public function extism_plugin_new_with_fuel_limit(string $wasm, int $wasm_size, array $functions, int $n_functions, bool $with_wasi, int $fuel_limit, \FFI\CData $errPtr): ?\FFI\CData
     {
+        $functionHandles = array_map(function ($function) {
+            return $function->handle;
+        }, $functions);
+
+        $functionHandles = $this->toCArray($functionHandles, "ExtismFunction*");
+
         $ptr = $this->owned("uint8_t", $wasm);
-        $pluginPtr = $this->ffi->extism_plugin_new_with_fuel_limit($ptr, $wasm_size, $functions, $n_functions, $with_wasi ? 1 : 0, $fuel_limit, $errPtr);
+        $pluginPtr = $this->ffi->extism_plugin_new_with_fuel_limit($ptr, $wasm_size, $functionHandles, $n_functions, $with_wasi ? 1 : 0, $fuel_limit, $errPtr);
         return $this->ffi->cast("ExtismPlugin*", $pluginPtr);
     }
 
@@ -138,10 +144,17 @@ class LibExtism
     /**
      * Pre-compile an Extism plugin
      */
-    public function extism_compiled_plugin_new(string $wasm, int $wasm_size, \FFI\CData $functions, int $n_functions, bool $with_wasi, \FFI\CData $errPtr): ?\FFI\CData
+    public function extism_compiled_plugin_new(string $wasm, int $wasm_size, array $functions, int $n_functions, bool $with_wasi, \FFI\CData $errPtr): ?\FFI\CData
     {
+        $functionHandles = array_map(function ($function) {
+            return $function->handle;
+        }, $functions);
+
+        $functionHandles = $this->toCArray($functionHandles, "ExtismFunction*");
+
+
         $ptr = $this->owned("uint8_t", $wasm);
-        $pluginPtr = $this->ffi->extism_compiled_plugin_new($ptr, $wasm_size, $functions, $n_functions, $with_wasi ? 1 : 0, $errPtr);
+        $pluginPtr = $this->ffi->extism_compiled_plugin_new($ptr, $wasm_size, $functionHandles, $n_functions, $with_wasi ? 1 : 0, $errPtr);
         return $this->ffi->cast("ExtismCompiledPlugin*", $pluginPtr);
     }
 

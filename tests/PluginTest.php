@@ -6,6 +6,7 @@ namespace Extism\Tests;
 
 use Extism\CurrentPlugin;
 use Extism\HostFunction;
+use Extism\PluginOptions;
 use PHPUnit\Framework\TestCase;
 use Extism\Plugin;
 use Extism\Manifest;
@@ -140,7 +141,18 @@ final class PluginTest extends TestCase
         $plugin = self::loadPlugin("count_vowels_kvstore.wasm", [$kvRead, $kvWrite]);
     }
 
-    public static function loadPlugin(string $name, array $functions, ?callable $config = null)
+    public function testFuelLimit(): void
+    {
+        $plugin = self::loadPlugin("sleep.wasm", [], null, new PluginOptions(true, 10));
+
+        try {
+            $plugin->call("run_test", "");
+        } catch (\Exception $e) {
+            $this->assertStringContainsString("fuel", $e->getMessage());
+        }
+    }
+
+    public static function loadPlugin(string $name, array $functions, ?callable $config = null, $withWasi = true)
     {
         $path = __DIR__ . '/../wasm/' . $name;
         $manifest = new Manifest(new PathWasmSource($path, 'main'));
@@ -149,6 +161,6 @@ final class PluginTest extends TestCase
             $config($manifest);
         }
 
-        return new Plugin($manifest, true, $functions);
+        return new Plugin($manifest, $withWasi, $functions);
     }
 }
