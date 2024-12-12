@@ -98,6 +98,39 @@ final class PluginTest extends TestCase
         $this->assertEquals('{"count":3,"total":6,"vowels":"aeiouAEIOU"}', $response);
     }
 
+
+    public function testCallWithHostContext(): void
+    {
+        $multiUserKvStore = [[]];
+
+        $kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (CurrentPlugin $p, string $key) use (&$multiUserKvStore) {
+            $ctx = $p->getCallHostContext(); // get a copy of the host context data
+            $userId = $ctx["userId"];
+            $kvStore = $multiUserKvStore[$userId] ?? [];
+
+            return $kvStore[$key] ?? "\0\0\0\0";
+        });
+
+        $kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (CurrentPlugin $p, string $key, string $value) use (&$multiUserKvStore) {
+            $ctx = $p->getCallHostContext(); // get a copy of the host context data
+            $userId = $ctx["userId"];
+            $kvStore = $multiUserKvStore[$userId] ?? [];
+
+            $kvStore[$key] = $value;
+            $multiUserKvStore[$userId] = $kvStore;
+        });
+
+        $plugin = self::loadPlugin("count_vowels_kvstore.wasm", [$kvRead, $kvWrite]);
+
+        $ctx = ["userId" => 1];
+
+        $response = $plugin->callWithContext("count_vowels", "Hello World!", $ctx);
+        $this->assertEquals('{"count":3,"total":3,"vowels":"aeiouAEIOU"}', $response);
+
+        $response = $plugin->callWithContext("count_vowels", "Hello World!", $ctx);
+        $this->assertEquals('{"count":3,"total":6,"vowels":"aeiouAEIOU"}', $response);
+    }
+
     public function testHostFunctionManual(): void
     {
         $kvstore = [];

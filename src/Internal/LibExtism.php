@@ -197,7 +197,23 @@ class LibExtism
     public function extism_plugin_call_with_host_context(\FFI\CData $plugin, string $func_name, string $data, int $data_len, $host_context): int
     {
         $dataPtr = $this->owned("uint8_t", $data);
-        return $this->ffi->extism_plugin_call_with_host_context($plugin, $func_name, $dataPtr, $data_len, $host_context);
+
+        if ($host_context === null) {
+            return $this->ffi->extism_plugin_call_with_host_context($plugin, $func_name, $dataPtr, $data_len, null);
+        }
+
+        $serialized = serialize($host_context);
+        $contextPtr = $this->ffi->new("char*");
+        $contextArray = $this->ownedZero($serialized);
+        $contextPtr = \FFI::addr($contextArray);
+
+        return $this->ffi->extism_plugin_call_with_host_context(
+            $plugin,
+            $func_name,
+            $dataPtr,
+            $data_len,
+            $contextPtr
+        );
     }
 
     /**
@@ -217,6 +233,19 @@ class LibExtism
     {
         $dataPtr = $this->owned("uint8_t", $data);
         return $this->ffi->extism_plugin_call($plugin, $func_name, $dataPtr, $data_len);
+    }
+
+    /**
+     * Get the current plugin's associated host context data
+     */
+    public function extism_current_plugin_host_context(\FFI\CData $plugin): ?string
+    {
+        $ptr = $this->ffi->extism_current_plugin_host_context($plugin);
+        if ($ptr === null || \FFI::isNull($ptr)) {
+            return null;
+        }
+
+        return \FFI::string($this->ffi->cast("char *", $ptr));
     }
 
     public function extism_error(\FFI\CData $plugin): ?string
