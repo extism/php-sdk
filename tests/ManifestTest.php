@@ -73,7 +73,11 @@ final class ManifestTest extends TestCase
             $manifest->allowed_hosts = ["jsonplaceholder.*.com"];
         });
 
-        $response = $plugin->call("run_test", "");
+        $plugin->allowHttpResponseHeaders();
+
+        $req = json_encode(["url" => "https://jsonplaceholder.typicode.com/todos/1"]);
+
+        $response = $plugin->call("http_get", $req);
         $actual = json_decode($response);
         $this->assertEquals(1, $actual->userId);
     }
@@ -86,7 +90,9 @@ final class ManifestTest extends TestCase
             $manifest->allowed_hosts = [];
         });
 
-        $plugin->call("run_test", "");
+        $req = json_encode(["url" => "https://jsonplaceholder.typicode.com/todos/1"]);
+
+        $plugin->call("http_get", $req);
     }
 
     public static function loadPlugin(string $name, ?callable $config = null)

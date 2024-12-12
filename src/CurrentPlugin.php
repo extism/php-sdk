@@ -24,6 +24,21 @@ class CurrentPlugin
         $this->lib = $lib;
     }
 
+   /**
+     * Get *a copy* of the current plugin call's associated host context data. Returns null if call was made without host context.
+     *
+     * @return mixed|null Returns a copy of the host context data or null if none was provided
+     */
+    public function getCallHostContext()
+    {
+        $serialized = $this->lib->extism_current_plugin_host_context($this->handle);
+        if ($serialized === null) {
+            return null;
+        }
+
+        return unserialize($serialized);
+    }
+
     /**
      * Reads a string from the plugin's memory at the given offset.
      *
