@@ -2,14 +2,17 @@
 
 namespace Extism\Internal;
 
+/** @internal */
 class PluginHandle
 {
+    /** @internal */
     public \Extism\Internal\LibExtism $lib;
-    public \FFI\CData $handle;
+    /** @internal */
+    public \FFI\CData $native;
 
     public function __construct($lib, \FFI\CData $handle)
     {
-        $this->handle = $handle;
+        $this->native = $handle;
         $this->lib = $lib;
     }
 }

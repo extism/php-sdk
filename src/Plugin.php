@@ -95,7 +95,7 @@ class Plugin
      */
     public function allowHttpResponseHeaders(): void
     {
-        $this->handle->lib->extism_plugin_allow_http_response_headers($this->handle->handle);
+        $this->handle->lib->extism_plugin_allow_http_response_headers($this->handle->native);
     }
 
     /**
@@ -105,7 +105,7 @@ class Plugin
      */
     public function reset(): bool
     {
-        return $this->handle->lib->extism_plugin_reset($this->handle->handle);
+        return $this->handle->lib->extism_plugin_reset($this->handle->native);
     }
 
     /**
@@ -121,7 +121,7 @@ class Plugin
             return false;
         }
 
-        return $this->handle->lib->extism_plugin_config($this->handle->handle, $json, strlen($json));
+        return $this->handle->lib->extism_plugin_config($this->handle->native, $json, strlen($json));
     }
 
     /**
@@ -131,7 +131,7 @@ class Plugin
      */
     public function getId(): string
     {
-        $bytes = $this->handle->lib->extism_plugin_id($this->handle->handle);
+        $bytes = $this->handle->lib->extism_plugin_id($this->handle->native);
         return bin2hex(\FFI::string($bytes, 16));
     }
 
@@ -144,7 +144,7 @@ class Plugin
      */
     public function functionExists(string $name): bool
     {
-        return $this->handle->lib->extism_plugin_function_exists($this->handle->handle, $name);
+        return $this->handle->lib->extism_plugin_function_exists($this->handle->native, $name);
     }
 
     /**
@@ -157,16 +157,16 @@ class Plugin
      */
     public function call(string $name, string $input = ""): string
     {
-        $rc = $this->handle->lib->extism_plugin_call($this->handle->handle, $name, $input, strlen($input));
+        $rc = $this->handle->lib->extism_plugin_call($this->handle->native, $name, $input, strlen($input));
 
         $msg = "code = " . $rc;
-        $err = $this->handle->lib->extism_error($this->handle->handle);
+        $err = $this->handle->lib->extism_error($this->handle->native);
         if ($err) {
             $msg = $msg . ", error = " . $err;
             throw new \Extism\FunctionCallException("Extism: call to '" . $name . "' failed with " . $msg, $err, $name);
         }
 
-        return $this->handle->lib->extism_plugin_output_data($this->handle->handle);
+        return $this->handle->lib->extism_plugin_output_data($this->handle->native);
     }
 
     /**
@@ -179,16 +179,16 @@ class Plugin
      */
     public function callWithContext(string $name, string $input = "", $context = null): string
     {
-        $rc = $this->handle->lib->extism_plugin_call_with_host_context($this->handle->handle, $name, $input, strlen($input), $context);
+        $rc = $this->handle->lib->extism_plugin_call_with_host_context($this->handle->native, $name, $input, strlen($input), $context);
 
         $msg = "code = " . $rc;
-        $err = $this->handle->lib->extism_error($this->handle->handle);
+        $err = $this->handle->lib->extism_error($this->handle->native);
         if ($err) {
             $msg = $msg . ", error = " . $err;
             throw new \Extism\FunctionCallException("Extism: call to '" . $name . "' failed with " . $msg, $err, $name);
         }
 
-        return $this->handle->lib->extism_plugin_output_data($this->handle->handle);
+        return $this->handle->lib->extism_plugin_output_data($this->handle->native);
     }
 
     /**
@@ -219,6 +219,6 @@ class Plugin
      */
     public function __destruct()
     {
-        $this->handle->lib->extism_plugin_free($this->handle->handle);
+        $this->handle->lib->extism_plugin_free($this->handle->native);
     }
 }

@@ -78,15 +78,6 @@ class CompiledPlugin
     }
 
     /**
-     * Get the functions array
-     * @internal
-     */
-    public function getFunctions(): array
-    {
-        return $this->functions;
-    }
-
-    /**
      * Destructor to clean up resources
      */
     public function __destruct()

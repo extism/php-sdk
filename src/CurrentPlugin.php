@@ -48,8 +48,8 @@ class CurrentPlugin
     {
         $ptr = $this->lib->extism_current_plugin_memory($this->handle);
         $ptr = $this->lib->ffi->cast("char *", $ptr);
-        $end = $ptr + $offset;
-        $ptr = $this->lib->ffi->cast("char *", $end);
+        $blockStart = $ptr + $offset;
+        $ptr = $this->lib->ffi->cast("char *", $blockStart);
 
         $length = $this->lib->extism_current_plugin_memory_length($this->handle, $offset);
 
@@ -88,8 +88,8 @@ class CurrentPlugin
     {
         $ptr = $this->lib->extism_current_plugin_memory($this->handle);
         $ptr = $this->lib->ffi->cast("char *", $ptr);
-        $end = $ptr + $offset;
-        $ptr = $this->lib->ffi->cast("char *", $end);
+        $blockStart = $ptr + $offset;
+        $ptr = $this->lib->ffi->cast("char *", $blockStart);
 
         \FFI::memcpy($ptr, $data, strlen($data));
     }
@@ -101,9 +101,6 @@ class CurrentPlugin
      */
     private function free_block(int $offset): void
     {
-        $cdata_offset = $this->lib->ffi->new('int');
-        $cdata_offset->cdata = $offset;
-        
-        $this->lib->extism_current_plugin_memory_free($this->handle, $cdata_offset);
+        $this->lib->extism_current_plugin_memory_free($this->handle, $offset);
     }
 }

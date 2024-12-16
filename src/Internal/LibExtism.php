@@ -61,7 +61,7 @@ class LibExtism
         return $this->ffi->extism_current_plugin_memory($plugin);
     }
 
-    public function extism_current_plugin_memory_free(\FFI\CData $plugin, \FFI\CData $ptr): void
+    public function extism_current_plugin_memory_free(\FFI\CData $plugin, int $ptr): void
     {
         $this->ffi->extism_current_plugin_memory_free($plugin, $ptr);
     }
