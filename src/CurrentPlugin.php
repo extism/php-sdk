@@ -101,6 +101,9 @@ class CurrentPlugin
      */
     private function free_block(int $offset): void
     {
-        $this->lib->extism_current_plugin_memory_free($this->handle, $offset);
+        $cdata_offset = $this->lib->ffi->new('int');
+        $cdata_offset->cdata = $offset;
+        
+        $this->lib->extism_current_plugin_memory_free($this->handle, $cdata_offset);
     }
 }

@@ -64,7 +64,7 @@ class CompiledPlugin
     public function instantiate(): Plugin
     {
         $errPtr = $this->lib->ffi->new($this->lib->ffi->type("char*"));
-        $handle = $this->lib->extism_plugin_new_from_compiled($this->handle, \FFI::addr($errPtr));
+        $nativeHandle = $this->lib->extism_plugin_new_from_compiled($this->handle, \FFI::addr($errPtr));
 
         if (\FFI::isNull($errPtr) === false) {
             $error = \FFI::string($errPtr);
@@ -72,8 +72,9 @@ class CompiledPlugin
             throw new \Extism\PluginLoadException("Extism: unable to load plugin from compiled: " . $error);
         }
 
-        $wrapper = new \Extism\Internal\PluginHandle($this->lib, $handle);
-        return new Plugin($wrapper);
+        $handle = new \Extism\Internal\PluginHandle($this->lib, $nativeHandle);
+
+        return new Plugin($handle);
     }
 
     /**
