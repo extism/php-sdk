@@ -63,16 +63,17 @@ class CompiledPlugin
      */
     public function instantiate(): Plugin
     {
-        return new Plugin($this);
-    }
+        $errPtr = $this->lib->ffi->new($this->lib->ffi->type("char*"));
+        $handle = $this->lib->extism_plugin_new_from_compiled($this->handle, \FFI::addr($errPtr));
 
-    /**
-     * Get the native handle
-     * @internal
-     */
-    public function getNativeHandle(): \FFI\CData
-    {
-        return $this->handle;
+        if (\FFI::isNull($errPtr) === false) {
+            $error = \FFI::string($errPtr);
+            $this->lib->extism_plugin_new_error_free($errPtr);
+            throw new \Extism\PluginLoadException("Extism: unable to load plugin from compiled: " . $error);
+        }
+
+        $wrapper = new \Extism\Internal\PluginHandle($this->lib, $handle);
+        return new Plugin($wrapper);
     }
 
     /**

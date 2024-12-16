@@ -13,7 +13,7 @@ use Extism\Manifest;
 use Extism\Manifest\PathWasmSource;
 use Extism\ExtismValType;
 
-final class CompiledPluginTests extends TestCase
+final class CompiledPluginTest extends TestCase
 {
     public function testCompiledCountVowels(): void
     {

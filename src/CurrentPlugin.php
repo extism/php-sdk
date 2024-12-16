@@ -48,7 +48,8 @@ class CurrentPlugin
     {
         $ptr = $this->lib->extism_current_plugin_memory($this->handle);
         $ptr = $this->lib->ffi->cast("char *", $ptr);
-        $ptr = $this->lib->ffi->cast("char *", $ptr + $offset);
+        $end = $ptr + $offset;
+        $ptr = $this->lib->ffi->cast("char *", $end);
 
         $length = $this->lib->extism_current_plugin_memory_length($this->handle, $offset);
 
@@ -87,7 +88,8 @@ class CurrentPlugin
     {
         $ptr = $this->lib->extism_current_plugin_memory($this->handle);
         $ptr = $this->lib->ffi->cast("char *", $ptr);
-        $ptr = $this->lib->ffi->cast("char *", $ptr + $offset);
+        $end = $ptr + $offset;
+        $ptr = $this->lib->ffi->cast("char *", $end);
 
         \FFI::memcpy($ptr, $data, strlen($data));
     }

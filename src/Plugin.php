@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Extism;
 
+use Extism\Internal\PluginHandle;
 use Extism\Manifest\ByteArrayWasmSource;
 
 class Plugin
 {
-    private \Extism\Internal\LibExtism $lib;
-    private \FFI\CData $handle;
+    private PluginHandle $handle;
 
     /**
      * Initialize a plugin from a byte array.
@@ -30,20 +30,23 @@ class Plugin
     /**
      * Constructor
      *
-     * @param Manifest $manifest A manifest that describes the Wasm binaries and configures permissions.
+     * @param Manifest|PluginHandle $manifest A manifest that describes the Wasm binaries and configures permissions.
      * @param bool|PluginOptions $withWasiOrOptions Enable WASI or PluginOptions instance
      * @param array $functions Array of host functions
      */
-    public function __construct(Manifest $manifest, $withWasiOrOptions = false, array $functions = [])
+    public function __construct($manifest, $withWasiOrOptions = false, array $functions = [])
     {
+        if ($manifest instanceof PluginHandle) {
+            $this->handle = $manifest;
+            return;
+        }
+
         global $lib;
 
         if ($lib === null) {
             $lib = new \Extism\Internal\LibExtism();
         }
 
-        $this->lib = $lib;
-        
         // Handle backwards compatibility
         $options = $withWasiOrOptions;
         if (is_bool($withWasiOrOptions)) {
@@ -58,7 +61,7 @@ class Plugin
         $errPtr = $lib->ffi->new($lib->ffi->type("char*"));
  
         if ($options->getFuelLimit() !== null) {
-            $handle = $this->lib->extism_plugin_new_with_fuel_limit(
+            $handle = $lib->extism_plugin_new_with_fuel_limit(
                 $data,
                 strlen($data),
                 $functions,
@@ -68,7 +71,7 @@ class Plugin
                 \FFI::addr($errPtr)
             );
         } else {
-            $handle = $this->lib->extism_plugin_new(
+            $handle = $lib->extism_plugin_new(
                 $data,
                 strlen($data),
                 $functions,
@@ -80,39 +83,11 @@ class Plugin
 
         if (\FFI::isNull($errPtr) === false) {
             $error = \FFI::string($errPtr);
-            $this->lib->extism_plugin_new_error_free($errPtr);
+            $lib->extism_plugin_new_error_free($errPtr);
             throw new \Extism\PluginLoadException("Extism: unable to load plugin: " . $error);
         }
 
-        $this->handle = $handle;
-    }
-
-    /**
-     * Internal constructor from CompiledPlugin
-     * @internal
-     */
-    public static function fromCompiled(CompiledPlugin $compiled): self
-    {
-        global $lib;
-
-        if ($lib === null) {
-            $lib = new \Extism\Internal\LibExtism();
-        }
-
-        $errPtr = $lib->ffi->new($lib->ffi->type("char*"));
-        $handle = $lib->extism_plugin_new_from_compiled($compiled->getNativeHandle(), \FFI::addr($errPtr));
-
-        if (\FFI::isNull($errPtr) === false) {
-            $error = \FFI::string($errPtr);
-            $lib->extism_plugin_new_error_free($errPtr);
-            throw new \Extism\PluginLoadException("Extism: unable to load plugin from compiled: " . $error);
-        }
-
-        $plugin = new self();
-        $plugin->lib = $lib;
-        $plugin->handle = $handle;
-
-        return $plugin;
+        $this->handle = new PluginHandle($lib, $handle);
     }
 
     /**
@@ -120,7 +95,7 @@ class Plugin
      */
     public function allowHttpResponseHeaders(): void
     {
-        $this->lib->extism_plugin_allow_http_response_headers($this->handle);
+        $this->handle->lib->extism_plugin_allow_http_response_headers($this->handle->handle);
     }
 
     /**
@@ -130,7 +105,7 @@ class Plugin
      */
     public function reset(): bool
     {
-        return $this->lib->extism_plugin_reset($this->handle);
+        return $this->handle->lib->extism_plugin_reset($this->handle->handle);
     }
 
     /**
@@ -146,7 +121,7 @@ class Plugin
             return false;
         }
 
-        return $this->lib->extism_plugin_config($this->handle, $json, strlen($json));
+        return $this->handle->lib->extism_plugin_config($this->handle->handle, $json, strlen($json));
     }
 
     /**
@@ -156,7 +131,7 @@ class Plugin
      */
     public function getId(): string
     {
-        $bytes = $this->lib->extism_plugin_id($this->handle);
+        $bytes = $this->handle->lib->extism_plugin_id($this->handle->handle);
         return bin2hex(\FFI::string($bytes, 16));
     }
 
@@ -169,7 +144,7 @@ class Plugin
      */
     public function functionExists(string $name): bool
     {
-        return $this->lib->extism_plugin_function_exists($this->handle, $name);
+        return $this->handle->lib->extism_plugin_function_exists($this->handle->handle, $name);
     }
 
     /**
@@ -182,16 +157,16 @@ class Plugin
      */
     public function call(string $name, string $input = ""): string
     {
-        $rc = $this->lib->extism_plugin_call($this->handle, $name, $input, strlen($input));
+        $rc = $this->handle->lib->extism_plugin_call($this->handle->handle, $name, $input, strlen($input));
 
         $msg = "code = " . $rc;
-        $err = $this->lib->extism_error($this->handle);
+        $err = $this->handle->lib->extism_error($this->handle->handle);
         if ($err) {
             $msg = $msg . ", error = " . $err;
             throw new \Extism\FunctionCallException("Extism: call to '" . $name . "' failed with " . $msg, $err, $name);
         }
 
-        return $this->lib->extism_plugin_output_data($this->handle);
+        return $this->handle->lib->extism_plugin_output_data($this->handle->handle);
     }
 
     /**
@@ -204,16 +179,16 @@ class Plugin
      */
     public function callWithContext(string $name, string $input = "", $context = null): string
     {
-        $rc = $this->lib->extism_plugin_call_with_host_context($this->handle, $name, $input, strlen($input), $context);
+        $rc = $this->handle->lib->extism_plugin_call_with_host_context($this->handle->handle, $name, $input, strlen($input), $context);
 
         $msg = "code = " . $rc;
-        $err = $this->lib->extism_error($this->handle);
+        $err = $this->handle->lib->extism_error($this->handle->handle);
         if ($err) {
             $msg = $msg . ", error = " . $err;
             throw new \Extism\FunctionCallException("Extism: call to '" . $name . "' failed with " . $msg, $err, $name);
         }
 
-        return $this->lib->extism_plugin_output_data($this->handle);
+        return $this->handle->lib->extism_plugin_output_data($this->handle->handle);
     }
 
     /**
@@ -244,6 +219,6 @@ class Plugin
      */
     public function __destruct()
     {
-        $this->lib->extism_plugin_free($this->handle);
+        $this->handle->lib->extism_plugin_free($this->handle->handle);
     }
 }
