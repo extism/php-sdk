@@ -24,6 +24,21 @@ class CurrentPlugin
         $this->lib = $lib;
     }
 
+   /**
+     * Get *a copy* of the current plugin call's associated host context data. Returns null if call was made without host context.
+     *
+     * @return mixed|null Returns a copy of the host context data or null if none was provided
+     */
+    public function getCallHostContext()
+    {
+        $serialized = $this->lib->extism_current_plugin_host_context($this->handle);
+        if ($serialized === null) {
+            return null;
+        }
+
+        return unserialize($serialized);
+    }
+
     /**
      * Reads a string from the plugin's memory at the given offset.
      *
@@ -33,7 +48,8 @@ class CurrentPlugin
     {
         $ptr = $this->lib->extism_current_plugin_memory($this->handle);
         $ptr = $this->lib->ffi->cast("char *", $ptr);
-        $ptr = $this->lib->ffi->cast("char *", $ptr + $offset);
+        $blockStart = $ptr + $offset;
+        $ptr = $this->lib->ffi->cast("char *", $blockStart);
 
         $length = $this->lib->extism_current_plugin_memory_length($this->handle, $offset);
 
@@ -72,7 +88,8 @@ class CurrentPlugin
     {
         $ptr = $this->lib->extism_current_plugin_memory($this->handle);
         $ptr = $this->lib->ffi->cast("char *", $ptr);
-        $ptr = $this->lib->ffi->cast("char *", $ptr + $offset);
+        $blockStart = $ptr + $offset;
+        $ptr = $this->lib->ffi->cast("char *", $blockStart);
 
         \FFI::memcpy($ptr, $data, strlen($data));
     }
