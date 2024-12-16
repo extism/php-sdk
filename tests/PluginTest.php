@@ -98,7 +98,6 @@ final class PluginTest extends TestCase
         $this->assertEquals('{"count":3,"total":6,"vowels":"aeiouAEIOU"}', $response);
     }
 
-
     public function testCallWithHostContext(): void
     {
         $multiUserKvStore = [[]];

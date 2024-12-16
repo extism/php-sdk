@@ -194,3 +194,56 @@ Valid return types:
  - `int`: For `i32` and `i64` parameters.
  - `float`: For `f32` and `f64` parameters.
  - `string`: the content of the string will be allocated in the wasm plugin memory and the offset (`i64`) will be returned.
+
+### Fuel Limits
+
+Plugins can be initialized with a fuel limit to constrain their execution. When a plugin runs out of fuel, it will throw an exception. This is useful for preventing infinite loops or limiting resource usage.
+
+```php
+// Create plugin with fuel limit of 1000 instructions
+$plugin = new Plugin($manifest, true, [], new PluginOptions(true, 1000));
+
+try {
+    $output = $plugin->call("run_test", "");
+} catch (\Exception $e) {
+    // Plugin ran out of fuel
+    // The exception message will contain "fuel"
+}
+```
+
+### Call Host Context
+
+Call Host Context provides a way to pass per-call context data when invoking a plugin function. This is useful when you need to provide data specific to a particular function call rather than data that persists across all calls.
+
+Here's an example of using call host context to implement a multi-user key-value store where each user has their own isolated storage:
+
+```php
+$multiUserKvStore = [[]];
+
+$kvRead = new HostFunction("kv_read", [ExtismValType::I64], [ExtismValType::I64], function (CurrentPlugin $p, string $key) use (&$multiUserKvStore) {
+    $userId = $p->getCallHostContext(); // get a copy of the host context data
+    $kvStore = $multiUserKvStore[$userId] ?? [];
+
+    return $kvStore[$key] ?? "\0\0\0\0";
+});
+
+$kvWrite = new HostFunction("kv_write", [ExtismValType::I64, ExtismValType::I64], [], function (CurrentPlugin $p, string $key, string $value) use (&$multiUserKvStore) {
+    $userId = $p->getCallHostContext(); // get a copy of the host context data
+    $kvStore = $multiUserKvStore[$userId] ?? [];
+
+    $kvStore[$key] = $value;
+    $multiUserKvStore[$userId] = $kvStore;
+});
+
+$plugin = self::loadPlugin("count_vowels_kvstore.wasm", [$kvRead, $kvWrite]);
+
+$userId = 1;
+
+$response = $plugin->callWithContext("count_vowels", "Hello World!", $userId);
+$this->assertEquals('{"count":3,"total":3,"vowels":"aeiouAEIOU"}', $response);
+
+$response = $plugin->callWithContext("count_vowels", "Hello World!", $userId);
+$this->assertEquals('{"count":3,"total":6,"vowels":"aeiouAEIOU"}', $response);
+```
+
+Note: Unlike some other language SDKS, in the Extism PHP SDK the host context is copied when accessed via `getCallHostContext()`. This means that modifications to the context object within host functions won't affect the original context object passed to `callWithContext()`.
